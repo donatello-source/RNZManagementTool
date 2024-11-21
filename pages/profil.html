@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona Główna</title>
+    <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/profil.css">
+</head>
+<body>
+    <header>
+        <img width="512" height="512" src="https://robimynazywo.pl/wp-content/uploads/2023/07/cropped-Logo_1080.png" class="custom-logo" alt="ROBIMY NA ŻYWO">
+        <div class="RNZ-Header-text">
+            <a href="http://www.robimynazywo.pl">ROBIMY NA ŻYWO</a>
+            <div>Nie ma problemów, są tylko wyzwania do rozwiązania</div>
+        </div>
+        <div class="profile-link">
+            <a href="/profile.html">Jan Nowak</a>
+        </div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <button class="menu-toggle">☰</button>
+            <nav>
+                <ul>
+                    <li><a href="../pages/main.html">Home</a></li>
+                    <li><a href="../pages/pracownicy.html">Pracownicy</a></li>
+                    <li><a href="../pages/wydarzenia.html">Wydarzenia</a></li>
+                    <li><a href="../pages/wyplaty.html">Wyplaty</a></li>
+                    <li><a href="../pages/firmy.html">Firmy</a></li>
+                    <li><a href="../pages/ustawienia.html">Ustawienia</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main id="employee-profile">
+            <!-- Tutaj będą wyświetlane dane pracownika -->
+        </main>
+    
+        <script>
+            // Funkcja do odczytywania parametrów z URL
+            function getQueryParam(param) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param); // Zwróci wartość parametru 'id'
+            }
+            // Odczytanie id z URL
+            const employeeId = getQueryParam('id');
+            // Sprawdzenie, czy istnieje ID i pobranie danych
+            if (employeeId) {
+                fetchEmployeeData(employeeId);
+            } else {
+                console.error('Brak parametru ID w URL');
+            }
+
+            // Funkcja do pobrania danych pracownika z API
+            function fetchEmployeeData(id) {
+                fetch(`http://localhost/RNZManagementTool/php/get_employee.php?id=${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Błąd:', data.error);
+                        } else {
+                            displayEmployeeProfile(data); // Wyświetl dane pracownika
+                            console.log(data);
+                        }
+                    })
+                    .catch(error => console.error('Błąd podczas ładowania danych:', error));
+            }
+
+            // Funkcja do wyświetlenia danych pracownika
+            function displayEmployeeProfile(employee) {
+                const profileContainer = document.getElementById('employee-profile');
+                if (profileContainer) {
+                    profileContainer.innerHTML = `
+                        <div class="employee-card" style="background-color: ${employee.kolor}">
+                            <h2>${employee.Imie} ${employee.Nazwisko}</h2>
+                            <p>Numer telefonu: ${employee.NumerTelefonu}</p>
+                            <p>Email: ${employee.Email}</p>
+                            <p>Stanowisko: ${employee.Status}</p>
+                        </div>
+                    `;
+                } else {
+                    console.error('Element #employee-profile nie został znaleziony.');
+                }
+            }
+
+        </script>
+    </div>
+
+    <script>
+        const menuToggle = document.querySelector(".menu-toggle");
+        const sidebar = document.querySelector(".sidebar");
+        
+        menuToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("active");
+        });
+    </script>
+</body>
+</html>
