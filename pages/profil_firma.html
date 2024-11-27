@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona Główna</title>
+    <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/firma_profil.css">
+</head>
+<body>
+    <header>
+        <img width="512" height="512" src="https://robimynazywo.pl/wp-content/uploads/2023/07/cropped-Logo_1080.png" class="custom-logo" alt="ROBIMY NA ŻYWO">
+        <div class="RNZ-Header-text">
+            <a href="http://www.robimynazywo.pl">ROBIMY NA ŻYWO</a>
+            <div>Nie ma problemów, są tylko wyzwania do rozwiązania</div>
+        </div>
+        <div class="profile-link">
+            <a href="/profile.html">Jan Nowak</a>
+        </div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <button class="menu-toggle">☰</button>
+            <nav>
+                <ul>
+                    <li><a href="../pages/main.html">Home</a></li>
+                    <li><a href="../pages/pracownicy.html">Pracownicy</a></li>
+                    <li><a href="../pages/wydarzenia.html">Wydarzenia</a></li>
+                    <li><a href="../pages/wyplaty.html">Wyplaty</a></li>
+                    <li><a href="../pages/firmy.html">Firmy</a></li>
+                    <li><a href="../pages/ustawienia.html">Ustawienia</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main id="firm-profile">
+            <!-- Tutaj będą wyświetlane dane pracownika -->
+        </main>
+    
+        <script>
+            // Funkcja do odczytywania parametrów z URL
+            function getQueryParam(param) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param); // Zwróci wartość parametru 'id'
+            }
+            // Odczytanie id z URL
+            const firmId = getQueryParam('id');
+            // Sprawdzenie, czy istnieje ID i pobranie danych
+            if (firmId) {
+                fetchFirmData(firmId);
+            } else {
+                console.error('Brak parametru ID w URL');
+            }
+
+            // Funkcja do pobrania danych pracownika z API
+            function fetchFirmData(id) {
+                fetch(`http://localhost/RNZManagementTool/php/get_firm.php?id=${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Błąd:', data.error);
+                        } else {
+                            displayFirmProfile(data); // Wyświetl dane pracownika
+                            console.log(data);
+                        }
+                    })
+                    .catch(error => console.error('Błąd podczas ładowania danych:', error));
+            }
+
+
+
+function displayFirmProfile(firm) {
+    const profileContainer = document.getElementById('firm-profile');
+    if (profileContainer) {
+
+        profileContainer.innerHTML = `
+            <div class="firm-card">
+                <div class="firm-name">
+                    <label for="firm-name">Nazwa Firmy:</label>
+                    <input type="text" id="firm-name" value="${firm.NazwaFirmy}" readonly>
+                </div>
+                <div class="firm-phone">
+                    <label for="firm-phone">Numer telefonu:</label>
+                    <input type="text" id="firm-phone" value="${firm.Telefon}" readonly>
+                </div>
+                <div class="profil-addres">
+                    <label for="firm-address">Adres:</label>
+                    <input type="text" id="firm-address" value="${firm.AdresFirmy}" readonly>
+                </div>
+                <div class="profil-state">
+                    <label for="firm-position">NIP:</label>
+                    <input type="text" id="firm-position" value="${firm.NIP}" readonly>
+                </div>
+            </div>
+        `;
+    } else {
+        console.error('Element #firm-profile nie został znaleziony.');
+    }
+}
+
+
+        </script>
+    </div>
+
+    <script>
+        const menuToggle = document.querySelector(".menu-toggle");
+        const sidebar = document.querySelector(".sidebar");
+        
+        menuToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("active");
+        });
+    </script>
+</body>
+</html>

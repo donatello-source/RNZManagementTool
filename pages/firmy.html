@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Główna</title>
+    <title>Firmy</title>
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/global.css">
@@ -34,18 +34,13 @@
             </nav>
         </aside>
         <main class="content">
-
-
+            <div id="firm-container" class="firm-list">
+                <!-- Dane zostaną załadowane tutaj przez JS -->
+            </div>
         </main>
     </div>
 
-    <script>
-        const menuToggle = document.querySelector(".menu-toggle");
-        const sidebar = document.querySelector(".sidebar");
-        
-        menuToggle.addEventListener("click", () => {
-            sidebar.classList.toggle("active");
-        });
-    </script>
+    <script src="../js/firmy.js"></script>
+    <script src="../js/global.js"></script>
 </body>
 </html>

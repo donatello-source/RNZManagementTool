@@ -1,20 +1,59 @@
-/* Sekcja główna */
-.content {
-    flex: 1;
-    background-color: #222222;
-    padding: 1em;
-    overflow-y: auto;
-    /* Scroll tylko w sekcji głównej */
-}
-
 .events {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    padding: 20px;
 }
 
 .event-card {
-    background-color: #e3f7e0;
-    padding: 15px;
-    border-radius: 10px;
+    background-color: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-card:hover {
+    background-color: #ebebeb;
+}
+
+.event-header {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.event-dates {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.event-employees {
+    margin-bottom: 15px;
+}
+
+.employee-chip {
+    display: inline-block;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    padding: 5px 10px;
+    margin: 5px 5px 0 0;
+    font-size: 0.9em;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.employee-chip:hover {
+    background-color: #c0c0c0;
+}
+
+.event-comment {
+    font-size: 1em;
+    color: #444;
 }

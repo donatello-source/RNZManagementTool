@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Główna</title>
+    <title>Wydarzenia</title>
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/global.css">
@@ -34,19 +34,60 @@
             </nav>
         </aside>
         <main class="content">
-            <div class="events">
-
+            <div id="events-container" class="events">
+                <!-- Dane zostaną załadowane przez JS -->
             </div>
         </main>
     </div>
 
     <script>
-        const menuToggle = document.querySelector(".menu-toggle");
-        const sidebar = document.querySelector(".sidebar");
-        
-        menuToggle.addEventListener("click", () => {
-            sidebar.classList.toggle("active");
-        });
+        async function fetchEvents() {
+            try {
+                const response = await fetch('http://localhost/RNZManagementTool/php/get_events.php');
+                const events = await response.json();
+                displayEvents(events);
+            } catch (error) {
+                console.error('Błąd podczas ładowania wydarzeń:', error);
+            }
+        }
+
+        function displayEvents(events) {
+            const eventsContainer = document.getElementById('events-container');
+            eventsContainer.innerHTML = ''; // Wyczyść kontener
+            console.log(events[0]);
+
+            
+            events.forEach(event => {
+                const employeesHtml = event.ListaPracownikow && Array.isArray(event.ListaPracownikow) 
+                ? event.ListaPracownikow.map(employee => `
+                    <div style="background-color: ${employee.kolor};" class="employee-chip" onclick="location.href='../pages/profil.html?id=${employee.IdOsoba}';">
+                        ${employee.Imie} ${employee.Nazwisko}
+                    </div>
+                `).join('')
+                : '';
+
+                eventsContainer.innerHTML += `
+                    <div class="event-card">
+                        <div class="event-header">
+                            ${event.Miejsce} - ${event.NazwaFirmy}
+                        </div>
+                        <div class="event-dates">
+                            Od: ${event.DataPoczatek} &nbsp; Do: ${event.DataKoniec}
+                        </div>
+                        <div class="event-employees">
+                            <div>Lista pracowników:</div>
+                            ${employeesHtml}
+                        </div>
+                        <div class="event-comment">
+                            Komentarz: ${event.Komentarz || 'Brak'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = fetchEvents;
     </script>
+    <script scr="../js/global.js"></script>
 </body>
 </html>
