@@ -74,10 +74,26 @@
                 if (profileContainer) {
                     profileContainer.innerHTML = `
                         <div class="employee-card" style="background-color: ${employee.kolor}">
-                            <h2>${employee.Imie} ${employee.Nazwisko}</h2>
-                            <p>Numer telefonu: ${employee.NumerTelefonu}</p>
-                            <p>Email: ${employee.Email}</p>
-                            <p>Stanowisko: ${employee.Status}</p>
+                            <div class="profil-name">
+                                <label for="employee-name">Imię i nazwisko:</label>
+                                <input type="text" id="employee-name" value="${employee.Imie} ${employee.Nazwisko}" readonly>
+                            </div>
+                            <div class="profil-phone">
+                                <label for="employee-phone">Numer telefonu:</label>
+                                <input type="text" id="employee-phone" value="${employee.NumerTelefonu}" readonly>
+                            </div>
+                            <div class="profil-mail">
+                                <label for="employee-mail">Email:</label>
+                                <input type="email" id="employee-mail" value="${employee.Email}" readonly>
+                            </div>
+                            <div class="profil-addres">
+                                <label for="employee-address">Adres zamieszkania:</label>
+                                <input type="text" id="employee-address" value="${employee.AdresZamieszkania}" readonly>
+                            </div>
+                            <div class="profil-state">
+                                <label for="employee-position">Stanowisko:</label>
+                                <input type="text" id="employee-position" value="${employee.Status}" readonly>
+                            </div>
                         </div>
                     `;
                 } else {

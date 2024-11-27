@@ -1,9 +1,9 @@
 /* Stylizacja nagłówka sekcji */
 .content {
-    height: 80vh;
+    height: 75vh;
 }
 
-/*       ScrollBar 2        */
+/*       ScrollBar        */
 
 .employees-list::-webkit-scrollbar {
     width: 12px;
