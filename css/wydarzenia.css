@@ -5,12 +5,35 @@
     padding: 20px;
 }
 
+/*       ScrollBar        */
+
+.content::-webkit-scrollbar {
+    width: 12px;
+}
+
+.content::-webkit-scrollbar-track {
+    border-radius: 8px;
+    background-color: #e7e7e7;
+    border: 1px solid #cacaca;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+}
+
+.content::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: #363636;
+}
+
+.content {
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
 .event-card {
     background-color: #f7f7f7;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 20px;
-    width: 100%;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     text-align: left;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -25,6 +48,7 @@
     font-weight: 600;
     margin-bottom: 10px;
     color: #222;
+    cursor: pointer;
 }
 
 .event-dates {
@@ -56,4 +80,54 @@
 .event-comment {
     font-size: 1em;
     color: #444;
+}
+
+
+.create_event {
+    background-color: lightseagreen;
+    position: fixed;
+    border-radius: 50%;
+    /* Okrągły kształt */
+    width: 60px;
+    /* Szerokość */
+    height: 60px;
+    /* Wysokość = Szerokość */
+    right: 20px;
+    /* Pozycja od prawej krawędzi */
+    bottom: 20px;
+    /* Pozycja od dołu */
+    font-size: 2rem;
+    /* Rozmiar czcionki */
+    text-align: center;
+    /* Wyrównanie tekstu */
+    color: white;
+    /* Kolor tekstu */
+    line-height: 60px;
+    /* Wyrównanie tekstu pionowe */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    /* Cień dla lepszego wyglądu */
+    border: none;
+    /* Usuń ramkę */
+    cursor: pointer;
+    /* Zmień kursor na rękę przy najechaniu */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Animacje */
+}
+
+.create_event:hover {
+    transform: scale(1.1);
+    /* Powiększenie na hover */
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+    /* Większy cień */
+}
+
+@media (max-width: 720px) {
+    .content {
+        height: 85vh;
+    }
+
+    .event-card {
+        margin-left: 20px;
+    }
+
 }

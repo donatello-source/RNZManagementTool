@@ -4,13 +4,15 @@ body {
     display: block;
     background-color: #222222;
 }
-.bodyLoginPage{
+
+.bodyLoginPage {
     margin: 0;
     padding: 0;
     height: 100vh;
     display: flex;
     flex-direction: column;
 }
+
 header {
     background-color: black;
     width: 100%;
@@ -35,7 +37,7 @@ header {
     padding-top: 0.75vh;
 }
 
-.RNZ-Header-text > a {
+.RNZ-Header-text>a {
     letter-spacing: 0.25vw;
     font-size: clamp(16px, 1.85vw, 21px);
     color: white;
@@ -43,10 +45,11 @@ header {
     font-family: 'Playfair Display', serif;
 }
 
-.RNZ-Header-text > a:hover {
+.RNZ-Header-text>a:hover {
     transition: all 0.5s ease;
     color: #DB4F3D;
 }
+
 /* Styl głównego kontenera */
 .bodyLogin {
     background-color: #222222;
@@ -74,11 +77,13 @@ header {
     background-color: #ccc;
     color: black;
     font-weight: bold;
-    padding: 8px 15px;  /* Zmniejszony padding */
+    padding: 8px 15px;
+    /* Zmniejszony padding */
     border-radius: 10px;
     font-size: 1.1em;
     margin: 0 auto 20px auto;
-    width: 100%; /* Dopasowanie szerokości */
+    width: 100%;
+    /* Dopasowanie szerokości */
     max-width: 300px;
 }
 
@@ -92,7 +97,8 @@ header {
 .form-group {
     position: relative;
     margin: 25px 0;
-    width: 100%; /* Dopasowanie szerokości */
+    width: 100%;
+    /* Dopasowanie szerokości */
     max-width: 300px;
 }
 
@@ -123,25 +129,28 @@ header {
 }
 
 /* Przesuwanie etykiety nad polem */
-.form-group input:focus + label,
-.form-group input:not(:placeholder-shown) + label {
+.form-group input:focus+label,
+.form-group input:not(:placeholder-shown)+label {
     top: -10px;
     font-size: 0.8em;
     color: #DB4F3D;
 }
 
 /* Styl dla przycisków */
-.login-btn, .signup-btn {
+.login-btn,
+.signup-btn {
     background-color: #DB4F3D;
     color: white;
     border: none;
     border-radius: 20px;
-    padding: 12px 0; /* Zwiększony padding */
+    padding: 12px 0;
+    /* Zwiększony padding */
     font-weight: bold;
     font-size: 1em;
     margin: 15px 0;
     cursor: pointer;
-    width: 100%; /* Dopasowanie szerokości */
+    width: 100%;
+    /* Dopasowanie szerokości */
     max-width: 300px;
     transition: background-color 0.3s ease;
 }
@@ -150,7 +159,8 @@ header {
     background-color: #f07766;
 }
 
-.login-btn:hover, .signup-btn:hover {
+.login-btn:hover,
+.signup-btn:hover {
     background-color: #e56754;
 }
 
@@ -184,7 +194,10 @@ header {
         padding: 15px;
     }
 
-    .login-title, .form-group, .login-btn, .signup-btn {
+    .login-title,
+    .form-group,
+    .login-btn,
+    .signup-btn {
         max-width: 100%;
     }
 }

@@ -1,4 +1,8 @@
 /* Ogólne style */
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     font-family: 'Open Sans', sans-serif;
@@ -11,7 +15,6 @@ header {
     width: 100%;
     padding: 1.8vw 0 10px 0;
     color: white;
-    height: 15vh;
 }
 
 .headerDiv {
@@ -117,7 +120,7 @@ header {
 @media (max-width: 720px) {
     .sidebar {
         position: absolute;
-        left: -220px;
+        left: -190px;
         top: 0;
         height: 100vh;
         transition: left 0.3s;

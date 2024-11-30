@@ -1,0 +1,197 @@
+/* Sekcja główna */
+.content {
+    flex: 1;
+    background-color: #222222;
+    padding: 1em;
+}
+
+
+.create-event-container::-webkit-scrollbar {
+    width: 12px;
+}
+
+.create-event-container::-webkit-scrollbar-track {
+    border-radius: 8px;
+    background-color: #e7e7e7;
+    border: 1px solid #cacaca;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+}
+
+.create-event-container::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: #363636;
+}
+
+
+.create-event-container {
+    overflow: scroll;
+    overflow-x: hidden;
+    width: 75vw;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-event-container h1 {
+    margin-top: 0px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+#checkbox-form {
+    display: flex;
+    align-items: center;
+    /* Wyrównanie checkboxa z tekstem */
+    font-size: 16px;
+    margin: 10px 0;
+    /* Odstęp od innych elementów */
+}
+
+#checkbox-form label {
+    display: flex;
+    align-items: center;
+    /* Wyrównanie checkboxa z tekstem */
+    gap: 10px;
+    /* Odstęp między tekstem a checkboxem */
+}
+
+#checkbox-form input[type="checkbox"] {
+    margin: 0;
+    width: 20px;
+}
+
+
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+input,
+select,
+textarea {
+    width: 65vw;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+input {
+    width: 65vw;
+}
+
+textarea {
+    resize: vertical;
+    height: 80px;
+}
+
+.required {
+    color: red;
+    font-weight: bold;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: #4caf50;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Stylizacja dla kontenera pracowników */
+#pracownicy-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    position: relative;
+    /* Dodajemy pozycjonowanie kontenera */
+}
+
+.pracownik-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.pracownik-item span {
+    margin-left: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* Stylizacja przycisku "+" */
+.add-btn {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-color: #4caf50;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.add-btn:hover {
+    background-color: #45a049;
+}
+
+#pracownicy-dropdown {
+    position: absolute;
+    /* Pozycjonujemy absolutnie względem rodzica (pracownicy-container) */
+    /* Ustawiamy dropdown tuż poniżej "+" */
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    /* Domyślnie ukryty */
+}
+
+#pracownicy-dropdown.active {
+    display: block;
+    /* Pokazujemy dropdown, gdy ma klasę .active */
+}
+
+#pracownicy-dropdown div {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#pracownicy-dropdown div:hover {
+    background-color: #f0f0f0;
+}
+
+@media (max-width: 720px) {
+    .content {
+        height: 85vh;
+    }
+}

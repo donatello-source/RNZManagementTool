@@ -1,12 +1,12 @@
 /* Sekcja główna */
 .content {
-    height: 75vh;
     flex: 1;
     background-color: #222222;
     padding: 1em;
     overflow-y: auto;
     /* Scroll tylko w sekcji głównej */
 }
+
 .content::-webkit-scrollbar {
     width: 12px;
 }
@@ -29,8 +29,32 @@
     gap: 15px;
 }
 
+.event-header {
+    font-size: 2rem;
+}
+
 .event-card {
     background-color: #e3f7e0;
+    /* Domyślny kolor */
     padding: 15px;
     border-radius: 10px;
+}
+
+.event-card.red {
+    background-color: #f8d7da;
+}
+
+.event-card.orange {
+    background-color: #ffe8cc;
+}
+
+@media (max-width: 720px) {
+    .content {
+        height: 85vh;
+    }
+
+    .event-card {
+        margin-left: 20px;
+    }
+
 }
