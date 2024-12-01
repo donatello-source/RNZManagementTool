@@ -3,6 +3,14 @@
     box-sizing: border-box;
 }
 
+.scale-1-25 .container {
+    height: 80vh;
+}
+
+.scale-1-5 .container {
+    height: 78vh;
+}
+
 body {
     margin: 0;
     font-family: 'Open Sans', sans-serif;

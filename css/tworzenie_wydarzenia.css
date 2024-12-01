@@ -26,7 +26,6 @@
 .create-event-container {
     overflow: scroll;
     overflow-x: hidden;
-    width: 75vw;
     margin: 20px auto;
     padding: 20px;
     background-color: #f9f9f9;

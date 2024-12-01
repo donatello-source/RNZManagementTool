@@ -11,6 +11,7 @@
     width: 12px;
 }
 
+
 .content::-webkit-scrollbar-track {
     border-radius: 8px;
     background-color: #e7e7e7;
