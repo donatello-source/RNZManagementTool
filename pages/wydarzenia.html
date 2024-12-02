@@ -33,12 +33,53 @@
                 </ul>
             </nav>
         </aside>
-        <main class="content">
-            <div class="create_event" onclick="location.href='../pages/tworzenie_wydarzenia.html'">+</div>
-            <div id="events-container" class="events">
-                <!-- Dane zostaną załadowane przez JS -->
+<main class="content">
+    <div class="create_event" onclick="location.href='../pages/tworzenie_wydarzenia.html'">+</div>
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Wyszukaj wydarzenie..." />
+        <button id="filter-button"><img src="https://cdn-icons-png.flaticon.com/512/107/107799.png" alt="Filters Icon"></button>
+    </div>
+    <div id="filters-panel" class="filters-panel hidden">
+        <div class="filters-content">
+            <h2>Filtry</h2>
+            <div class="filter-group">
+                <label>Miejsce:</label>
+                <input type="text" id="filter-place-input" placeholder="Dodaj miejsce" />
+                <button id="add-place-button">Dodaj</button>
+                <ul id="filter-places-list"></ul>
             </div>
-        </main>
+            <div class="filter-group">
+                <label>Firma:</label>
+                <input type="text" id="filter-company-input" list="companies-datalist" placeholder="Dodaj firmę" />
+                <datalist id="companies-datalist"></datalist>
+                <button id="add-company-button">Dodaj</button>
+                <ul id="filter-companies-list"></ul>
+            </div>
+            <div class="filter-group">
+                <label>Data:</label>
+                <input type="month" id="filter-date-start" />
+                <input type="month" id="filter-date-end" />
+            </div>
+            <div class="filter-group">
+                <label>Pracownicy:</label>
+                <input type="text" id="filter-employee-input" list="employees-datalist" placeholder="Dodaj pracownika" />
+                <datalist id="employees-datalist"></datalist>
+                <button id="add-employee-button">Dodaj</button>
+                <ul id="filter-employees-list"></ul>
+                <label>
+                    <input type="radio" name="employee-mode" value="all" checked /> Wszyscy
+                </label>
+                <label>
+                    <input type="radio" name="employee-mode" value="any" /> Którykolwiek
+                </label>
+            </div>
+            <button id="apply-filters-button">Zastosuj filtry</button>
+            <button id="clear-filters-button">Wyczyść filtry</button>
+        </div>
+    </div>
+    <div id="events-container" class="events"></div>
+</main>
+
     </div>
     <script src="../js/wydarzenia.js"></script>
     <script src="../js/global.js"></script>

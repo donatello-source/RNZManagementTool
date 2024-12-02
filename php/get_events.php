@@ -17,7 +17,7 @@ if ($mysqli->connect_error) {
 
 
 // Zapytanie do bazy danych o wydarzenia
-$query = "SELECT w.IdWydarzenia, w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy
+$query = "SELECT w.IdWydarzenia, w.NazwaWydarzenia, w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy
     FROM wydarzenia w
     JOIN firma f ON w.IdFirma = f.IdFirma";
 
@@ -54,6 +54,7 @@ if ($result->num_rows > 0) {
         // Dodanie wydarzenia do tablicy
         $events[] = [
             'IdWydarzenia' => $row['IdWydarzenia'],
+            'NazwaWydarzenia' => $row['NazwaWydarzenia'],
             'Miejsce' => $row['Miejsce'],
             'NazwaFirmy' => $row['NazwaFirmy'],
             'DataPoczatek' => $row['DataPoczatek'],

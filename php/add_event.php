@@ -4,7 +4,7 @@ $mysqli = new mysqli('localhost', 'root', '', 'rnzmanago');
 if ($mysqli->connect_error) die(json_encode(['error' => 'Błąd połączenia']));
 
 $data = json_decode(file_get_contents('php://input'), true);
-if (!$data || !isset($data['firma'], $data['miejsce'], $data['data-poczatek'])) {
+if (!$data || !isset($data['firma'], $data['nazwaWydarzenia'],$data['miejsce'], $data['data-poczatek'])) {
     echo json_encode(['error' => 'Wypełnij wymagane pola']);
     exit;
 }
@@ -14,6 +14,7 @@ error_log(json_encode($data));
 
 $firma = $mysqli->real_escape_string($data['firma']);
 $miejsce = $mysqli->real_escape_string($data['miejsce']);
+$nazwawydarzenia = $mysqli->real_escape_string($data['nazwaWydarzenia']);
 $dataPoczatek = $data['data-poczatek'];
 $dataKoniec = $data['data-koniec'] ?? $dataPoczatek;
 $komentarz = $mysqli->real_escape_string($data['komentarz'] ?? '');
@@ -29,8 +30,8 @@ if ($result->num_rows === 0) {
 $idFirma = $result->fetch_assoc()['IdFirma'];
 
 // Dodaj wydarzenie
-$query = "INSERT INTO wydarzenia (IdFirma, Miejsce, DataPoczatek, DataKoniec, Komentarz) 
-          VALUES ('$idFirma', '$miejsce', '$dataPoczatek', '$dataKoniec', '$komentarz')";
+$query = "INSERT INTO wydarzenia (IdFirma, NazwaWydarzenia, Miejsce, DataPoczatek, DataKoniec, Komentarz) 
+          VALUES ('$idFirma', '$nazwawydarzenia','$miejsce', '$dataPoczatek', '$dataKoniec', '$komentarz')";
 
 if (!$mysqli->query($query)) {
     echo json_encode(['error' => 'Błąd podczas dodawania wydarzenia']);

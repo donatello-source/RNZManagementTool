@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const nazwaWydarzenia = document.getElementById('nazwaWydarzenia');
     const datePoczatek = document.getElementById('data-poczatek');
     const dateKoniec = document.getElementById('data-koniec');
     const jednodnioweCheckbox = document.getElementById('jednodniowe');

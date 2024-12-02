@@ -4,7 +4,7 @@ $mysqli = new mysqli('localhost', 'root', '', 'rnzmanago');
 if ($mysqli->connect_error) die(json_encode(['error' => 'Błąd połączenia']));
 
 $data = json_decode(file_get_contents('php://input'), true);
-if (!$data || !isset($data['firma'], $data['miejsce'], $data['data-poczatek'])) {
+if (!$data || !isset($data['firma'], $data['nazwaWydarzenia'], $data['miejsce'], $data['data-poczatek'])) {
     echo json_encode(['error' => 'Wypełnij wymagane pola']);
     exit;
 }
@@ -16,6 +16,7 @@ if (isset($_GET['id'])) {
 
     $firma = $mysqli->real_escape_string($data['firma']);
     $miejsce = $mysqli->real_escape_string($data['miejsce']);
+    $nazwawydarzenia = $mysqli->real_escape_string($data['nazwaWydarzenia']);
     $hotel = $mysqli->real_escape_string($data['hotel']);
     $osobazarzadzajaca = $mysqli->real_escape_string($data['osoba-zarzadzajaca']);
     $dataPoczatek = $data['data-poczatek'];
@@ -40,6 +41,7 @@ if (isset($_GET['id'])) {
     $query = "UPDATE wydarzenia 
             SET IdFirma = '$idFirma', 
                 Miejsce = '$miejsce', 
+                NazwaWydarzenia = '$nazwawydarzenia', 
                 DataPoczatek = '$dataPoczatek', 
                 DataKoniec = '$dataKoniec', 
                 Komentarz = '$komentarz',

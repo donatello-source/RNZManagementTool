@@ -19,7 +19,7 @@ if (isset($_GET['id'])) {
     $eventId = $_GET['id'];
 
     // Zapytanie do bazy danych o wydarzenia
-    $query = "SELECT w.IdWydarzenia, w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy
+    $query = "SELECT w.IdWydarzenia, w.NazwaWydarzenia,w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy
         FROM wydarzenia w
         JOIN firma f ON w.IdFirma = f.IdFirma
         WHERE w.IdWydarzenia=$eventId";
@@ -57,6 +57,7 @@ if (isset($_GET['id'])) {
             // Dodanie wydarzenia do tablicy
             $events[] = [
                 'IdWydarzenia' => $row['IdWydarzenia'],
+                'NazwaWydarzenia' => $row['NazwaWydarzenia'],
                 'Miejsce' => $row['Miejsce'],
                 'NazwaFirmy' => $row['NazwaFirmy'],
                 'DataPoczatek' => $row['DataPoczatek'],

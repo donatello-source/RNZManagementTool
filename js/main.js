@@ -30,7 +30,8 @@ function displayEvents(events) {
         eventsContainer.innerHTML += `
             <div class="event-card ${colorClass}">
                 <div class="event-header" onclick="location.href='../pages/wydarzenie.html?id=${event.IdWydarzenia}';">
-                    ${event.Miejsce} - ${event.NazwaFirmy}
+                ${event.NazwaWydarzenia} </br>
+                ${event.Miejsce} - ${event.NazwaFirmy}
                 </div>
                 <div class="event-dates">
                     Od: ${event.DataPoczatek} &nbsp; Do: ${event.DataKoniec}

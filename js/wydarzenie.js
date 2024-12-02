@@ -189,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function populateEventDetails(event) {
+        document.getElementById("nazwaWydarzenia").value = event.NazwaWydarzenia || "";
         document.getElementById("firma").value = event.NazwaFirmy || "";
         document.getElementById("miejsce").value = event.Miejsce || "";
         document.getElementById("data-poczatek").value = event.DataPoczatek || "";
