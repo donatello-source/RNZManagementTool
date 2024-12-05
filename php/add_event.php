@@ -40,10 +40,21 @@ if (!$mysqli->query($query)) {
 
 $idWydarzenia = $mysqli->insert_id;
 
-// Dodaj pracowników
 foreach ($pracownicy as $pracownik) {
-    $mysqli->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba) 
-                    VALUES ('$idWydarzenia', '$pracownik')");
+    $dniPracownika = $data['dni'][$pracownik] ?? []; // Pobierz dni dla danego pracownika
+
+    if (!empty($dniPracownika)) {
+        // Dla każdego dnia dodaj osobny rekord
+        foreach ($dniPracownika as $dzien) {
+            $dzien = $mysqli->real_escape_string($dzien); // Zabezpieczenie danych
+            $mysqli->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
+                            VALUES ('$idWydarzenia', '$pracownik', '$dzien')");
+        }
+    } else {
+        // Jeśli brak przypisanych dni, dodaj z Dzien = '0'
+        $mysqli->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
+                        VALUES ('$idWydarzenia', '$pracownik', '0')");
+    }
 }
 
 echo json_encode(['message' => 'Wydarzenie zostało utworzone pomyślnie']);

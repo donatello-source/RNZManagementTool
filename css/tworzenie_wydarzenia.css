@@ -194,3 +194,34 @@ button[type="submit"]:hover {
         height: 85vh;
     }
 }
+
+#schedule-table-container {
+    margin: 20px auto;
+    overflow-x: auto;
+}
+
+#schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#schedule-table th,
+#schedule-table td {
+    border: 1px solid #ddd;
+    padding: 0px;
+    text-align: center;
+}
+
+
+
+.clickable-cell {
+    height: 30px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+}
+
+.clickable-cell.selected {
+    background-color: #ff0000;
+    /* Zielony dla zaznaczonego */
+}

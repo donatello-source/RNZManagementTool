@@ -1,23 +1,26 @@
-<!DOCTYPE html>
+<!DOCTYPE php>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strona Główna</title>
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/ustawienia.css">
+    <link rel="stylesheet" href="../../../css/global.css">
+    <link rel="stylesheet" href="../../../css/ustawienia.css">
 </head>
+
 <body>
     <header>
-        <img width="512" height="512" src="https://robimynazywo.pl/wp-content/uploads/2023/07/cropped-Logo_1080.png" class="custom-logo" alt="ROBIMY NA ŻYWO">
+        <img width="512" height="512" src="https://robimynazywo.pl/wp-content/uploads/2023/07/cropped-Logo_1080.png"
+            class="custom-logo" alt="ROBIMY NA ŻYWO">
         <div class="RNZ-Header-text">
             <a href="http://www.robimynazywo.pl">ROBIMY NA ŻYWO</a>
             <div>Nie ma problemów, są tylko wyzwania do rozwiązania</div>
         </div>
         <div class="profile-link">
-            <a href="/profile.html">Jan Nowak</a>
+            <a href="/profile.php">Jan Nowak</a>
         </div>
     </header>
     <div class="container">
@@ -25,11 +28,11 @@
             <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
-                    <li><a href="../pages/main.html">Home</a></li>
-                    <li><a href="../pages/pracownicy.html">Pracownicy</a></li>
-                    <li><a href="../pages/wyplaty.html">Wyplaty</a></li>
-                    <li><a href="../pages/firmy.html">Firmy</a></li>
-                    <li><a href="../pages/wydarzenia.html">Wydarzenia</a></li>
+                    <li><a href="main.php">Home</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php">Wyplaty</a></li>
+                    <li><a href="firmy.php">Firmy</a></li>
+                    <li><a href="wydarzenia.php">Wydarzenia</a></li>
                 </ul>
             </nav>
         </aside>
@@ -41,12 +44,13 @@
     </div>
 
     <script>
-        const menuToggle = document.querySelector(".menu-toggle");
-        const sidebar = document.querySelector(".sidebar");
-        
-        menuToggle.addEventListener("click", () => {
-            sidebar.classList.toggle("active");
-        });
+    const menuToggle = document.querySelector(".menu-toggle");
+    const sidebar = document.querySelector(".sidebar");
+
+    menuToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+    });
     </script>
 </body>
+
 </html>

@@ -35,7 +35,7 @@ if (isset($_GET['id'])) {
         while ($row = $result->fetch_assoc()) {
             // Zapytanie o pracowników przypisanych do wydarzenia
             $eventId = $row['IdWydarzenia'];
-            $employeeQuery = "SELECT Unique o.Imie, o.Nazwisko, o.IdOsoba, o.kolor
+            $employeeQuery = "SELECT o.Imie, o.Nazwisko, o.IdOsoba, o.kolor, wp.Dzien
                 FROM wydarzeniapracownicy wp
                 JOIN osoby o ON wp.IdOsoba = o.IdOsoba
                 WHERE wp.IdWydarzenia = $eventId";
@@ -49,7 +49,8 @@ if (isset($_GET['id'])) {
                     'IdOsoba' => $employeeRow['IdOsoba'],
                     'Imie' => $employeeRow['Imie'],
                     'Nazwisko' => $employeeRow['Nazwisko'],
-                    'kolor' => $employeeRow['kolor']
+                    'kolor' => $employeeRow['kolor'],
+                    'Dzien' => $employeeRow['Dzien']
                 ];
             }
             

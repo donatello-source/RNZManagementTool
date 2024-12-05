@@ -187,7 +187,7 @@ function displayEvents(events) {
     events.forEach(event => {
         const employeesHtml = event.ListaPracownikow && Array.isArray(event.ListaPracownikow)
             ? event.ListaPracownikow.map(employee => `
-            <div style="background-color: ${employee.kolor};" class="employee-chip" onclick="location.href='../pages/profil.html?id=${employee.IdOsoba}';">
+            <div style="background-color: ${employee.kolor};" class="employee-chip" onclick="location.href='../pages/profil.php?id=${employee.IdOsoba}';">
                 ${employee.Imie} ${employee.Nazwisko}
             </div>
         `).join('')
@@ -195,7 +195,7 @@ function displayEvents(events) {
 
         eventsContainer.innerHTML += `
             <div class="event-card">
-                <div class="event-header" onclick="location.href='../pages/wydarzenie.html?id=${event.IdWydarzenia}';">
+                <div class="event-header" onclick="location.href='../pages/wydarzenie.php?id=${event.IdWydarzenia}';">
                     ${event.NazwaWydarzenia} </br>
                     ${event.Miejsce} - ${event.NazwaFirmy}
                 </div>

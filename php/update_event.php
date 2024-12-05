@@ -57,9 +57,21 @@ if (isset($_GET['id'])) {
     $mysqli->query("DELETE FROM wydarzeniapracownicy WHERE IdWydarzenia = '$id'");
 
     foreach ($pracownicy as $pracownik) {
-        $mysqli->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba) 
-                        VALUES ('$id', '$pracownik')");
+    $dniPracownika = $data['dni'][$pracownik] ?? []; // Pobierz dni dla danego pracownika
+
+    if (!empty($dniPracownika)) {
+        // Dla każdego dnia dodaj osobny rekord
+        foreach ($dniPracownika as $dzien) {
+            $dzien = $mysqli->real_escape_string($dzien); // Zabezpieczenie danych
+            $mysqli->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
+                            VALUES ('$id', '$pracownik', '$dzien')");
+        }
+    } else {
+        // Jeśli brak przypisanych dni, dodaj z Dzien = '0'
+        $mysqli->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
+                        VALUES ('$id', '$pracownik', '0')");
     }
+}
 
     echo json_encode(['message' => 'Wydarzenie zostało zaktualizowane pomyślnie']);
 }
