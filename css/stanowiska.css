@@ -1,0 +1,51 @@
+/* Sekcja główna */
+.content {
+    flex: 1;
+    background-color: #222222;
+    padding: 1em;
+    overflow-y: auto;
+}
+
+#position-container {
+    width: 70vw;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: scroll;
+}
+
+#positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+#positions-table th,
+#positions-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+#positions-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+#positions-table td.clickable {
+    height: 30px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+}
+
+#positions-table td.selected {
+    background-color: #ff0000;
+}
+
+
+#positions-table td.clickable:hover {
+    background-color: #d1d1d1;
+}

@@ -29,7 +29,7 @@ function displayEvents(events) {
         // Generowanie HTML wydarzenia z odpowiednią klasą
         eventsContainer.innerHTML += `
             <div class="event-card ${colorClass}">
-                <div class="event-header" onclick="location.href='../pages/wydarzenie.html?id=${event.IdWydarzenia}';">
+                <div class="event-header" onclick="location.href='wydarzenie.php?id=${event.IdWydarzenia}';">
                 ${event.NazwaWydarzenia} </br>
                 ${event.Miejsce} - ${event.NazwaFirmy}
                 </div>

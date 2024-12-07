@@ -30,10 +30,11 @@ $user = $_SESSION['user'];
         </div>
         <div class="profile-link">
             <a href="profile.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
+            <div id="userStatus" hidden><?= $user['status'] ?></div>
         </div>
-        <div class="logout-button">
-            <a href="/RNZManagementTool/security/logout">Wyloguj się</a>
-        </div>
+        <form class="logout" action="/RNZManagementTool/logout" method="POST">
+            <button class="logoutBtn" type="submit">Wyloguj się</button>
+        </form>
     </header>
     <div class="container">
         <aside class="sidebar">
@@ -45,6 +46,7 @@ $user = $_SESSION['user'];
                     <li><a href="wydarzenia.html">Wydarzenia</a></li>
                     <li><a href="wyplaty.html">Wyplaty</a></li>
                     <li><a href="firmy.html">Firmy</a></li>
+                    <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="ustawienia.html">Ustawienia</a></li>
                 </ul>
             </nav>

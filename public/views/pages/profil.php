@@ -7,7 +7,7 @@ if (!isset($_SESSION['user'])) {
 }
 $user = $_SESSION['user'];
 ?>
-<!DOCTYPE php>
+<!DOCTYPE html>
 <html lang="pl">
 
 <head>
@@ -30,10 +30,11 @@ $user = $_SESSION['user'];
         </div>
         <div class="profile-link">
             <a href="profile.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
+            <div id="userStatus" hidden><?= $user['status'] ?></div>
         </div>
-        <div class="logout-button">
-            <a href="/RNZManagementTool/security/logout">Wyloguj się</a>
-        </div>
+        <form class="logout" action="/RNZManagementTool/logout" method="POST">
+            <button class="logoutBtn" type="submit">Wyloguj się</button>
+        </form>
     </header>
     <div class="container">
         <aside class="sidebar">
@@ -45,6 +46,7 @@ $user = $_SESSION['user'];
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
                     <li><a href="wyplaty.php">Wyplaty</a></li>
                     <li><a href="firmy.php">Firmy</a></li>
+                    <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
                 </ul>
             </nav>
@@ -53,116 +55,9 @@ $user = $_SESSION['user'];
             <!-- Tutaj będą wyświetlane dane pracownika -->
         </main>
 
-        <script>
-        // Funkcja do odczytywania parametrów z URL
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param); // Zwróci wartość parametru 'id'
-        }
-        // Odczytanie id z URL
-        const employeeId = getQueryParam('id');
-        // Sprawdzenie, czy istnieje ID i pobranie danych
-        if (employeeId) {
-            fetchEmployeeData(employeeId);
-        } else {
-            console.error('Brak parametru ID w URL');
-        }
-
-        // Funkcja do pobrania danych pracownika z API
-        function fetchEmployeeData(id) {
-            fetch(`http://localhost/RNZManagementTool/php/get_employee.php?id=${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.error('Błąd:', data.error);
-                    } else {
-                        displayEmployeeProfile(data); // Wyświetl dane pracownika
-                        console.log(data);
-                    }
-                })
-                .catch(error => console.error('Błąd podczas ładowania danych:', error));
-        }
-
-        function getComplementaryColor(color) {
-            console.log(color);
-            // Tworzymy ukryty element do zamiany dowolnego formatu koloru na RGB
-            const dummyDiv = document.createElement('div');
-            dummyDiv.style.color = color; // Ustawienie koloru
-            document.body.appendChild(dummyDiv);
-            console.log(color);
-            // Pobranie rzeczywistego koloru w formacie RGB
-            const computedColor = window.getComputedStyle(dummyDiv).color; // Wynik w 'rgb(r, g, b)'
-            document.body.removeChild(dummyDiv); // Usunięcie elementu po użyciu
-            // Wyciągnięcie składowych RGB
-            const rgbMatch = computedColor.match(/rgb\((\d+), (\d+), (\d+)\)/);
-            if (!rgbMatch) {
-                console.error('Nie można obliczyć koloru dla:', color);
-                return '#000000'; // Domyślny kolor: czarny
-            }
-
-            const r = parseInt(rgbMatch[1]);
-            const g = parseInt(rgbMatch[2]);
-            const b = parseInt(rgbMatch[3]);
-
-            // Obliczenie koloru dopełniającego
-            const compR = 255 - r;
-            const compG = 255 - g;
-            const compB = 255 - b;
-
-            // Konwersja na format RGB
-            if (r + g + b == 0 && color != 'black' && color != '#000000') {
-                return `rgb(0, 0, 0)`
-            }
-            return `rgb(${compR}, ${compG}, ${compB})`;
-        }
-
-
-        function displayEmployeeProfile(employee) {
-            const profileContainer = document.getElementById('employee-profile');
-            if (profileContainer) {
-                // Obliczenie koloru przeciwnika
-                const complementaryColor = getComplementaryColor(employee.kolor);
-
-                profileContainer.innerphp = `
-            <div class="employee-card">
-                <div class="profil-name">
-                    <label for="employee-name">Imię i nazwisko:</label>
-                    <input type="text" id="employee-name" value="${employee.Imie} ${employee.Nazwisko}" readonly>
-                </div>
-                <div class="profil-phone">
-                    <label for="employee-phone">Numer telefonu:</label>
-                    <input type="text" id="employee-phone" value="${employee.NumerTelefonu}" readonly>
-                </div>
-                <div class="profil-mail">
-                    <label for="employee-mail">Email:</label>
-                    <input type="email" id="employee-mail" value="${employee.Email}" readonly>
-                </div>
-                <div class="profil-addres">
-                    <label for="employee-address">Adres zamieszkania:</label>
-                    <input type="text" id="employee-address" value="${employee.AdresZamieszkania}" readonly>
-                </div>
-                <div class="profil-state">
-                    <label for="employee-position">Stanowisko:</label>
-                    <input type="text" id="employee-position" value="${employee.Status}" readonly>
-                </div>
-            </div>
-
-            <style>
-                #employee-profile {
-                    background-color: ${employee.kolor};
-                }
-                #employee-profile label {
-                    color: ${complementaryColor};
-                }
-            </style>
-        `;
-            } else {
-                console.error('Element #employee-profile nie został znaleziony.');
-            }
-        }
-        </script>
     </div>
 
+    <script src="../../../js/profil.js"></script>
     <script src="../../../js/global.js">
     </script>
 </body>

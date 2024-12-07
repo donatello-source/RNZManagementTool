@@ -16,7 +16,7 @@ function displayEmployees(data) {
         employeeContainer.innerHTML = ''; // Wyczyść zawartość
         data.forEach(employee => {
             employeeContainer.innerHTML += `
-            <div onclick="location.href='../pages/profil.html?id=${employee.idOsoba}';" class="employee-card" style='background-color: ${employee.kolor}'>
+            <div onclick="location.href='profil.php?id=${employee.idOsoba}';" class="employee-card" style='background-color: ${employee.kolor}'>
                 <div class='employee-name'>${employee.imie} ${employee.nazwisko}</div>
                 
                 <div class='employee-phone'>Numer telefonu: ${employee.numertelefonu}</div>

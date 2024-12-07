@@ -98,7 +98,7 @@ textarea {
     font-weight: bold;
 }
 
-button[type="submit"] {
+#submit-btn {
     width: 100%;
     padding: 15px;
     background-color: #4caf50;
@@ -109,7 +109,7 @@ button[type="submit"] {
     cursor: pointer;
 }
 
-button[type="submit"]:hover {
+#submit-btn:hover {
     background-color: #45a049;
 }
 

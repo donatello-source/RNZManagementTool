@@ -276,6 +276,12 @@ document.addEventListener("DOMContentLoaded", () => {
         addPracownikBtn.style.display = "inline-block";
         fetchPracownicy();
         fetchFirms();
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = `Usuń wydarzenie`;
+        deleteBtn.id = "remove-event-btn";
+        deleteBtn.type = "button";
+        deleteBtn.addEventListener("click", handleDeleteEvent);
+        document.getElementById('event-form').appendChild(deleteBtn);
     }
 
     async function fetchFirms() {
@@ -358,6 +364,20 @@ document.addEventListener("DOMContentLoaded", () => {
         eventForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     };
 
+    const handleDeleteEvent = async () => {
+        try {
+            const response = await fetch(`http://localhost/RNZManagementTool/php/delete_event.php?id=${eventId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            const result = await response.json();
+            alert(result.message || "Wydarzenie zostało zaktualizowane!");
+        } catch (error) {
+            console.error("Błąd podczas aktualizacji wydarzenia:", error);
+        }
+    };
+
+
     editEventButton.addEventListener("click", handleEditEvent);
 
 
@@ -375,7 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("event-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    console.log(eventId);
     const formData = new FormData(event.target);
     const eventData = Object.fromEntries(formData.entries());
     eventData.pracownicy = selectedPracownicy.map(p => p.IdOsoba);

@@ -153,5 +153,25 @@ header {
         height: auto;
     }
 
+    .logoutBtn {
+        left: 65px;
+    }
+}
 
+.logoutBtn {
+    border: none;
+    cursor: pointer;
+    background-color: #727272;
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    padding: 5px;
+    color: white;
+}
+
+.logoutBtn:hover {
+    transition: all 0.2s ease;
+    background-color: #474747;
 }

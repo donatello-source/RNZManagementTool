@@ -88,11 +88,14 @@ header {
 }
 
 /* Formularz logowania */
-.login-form {
+.login-form,
+.register-form {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
+
+
 
 .form-group {
     position: relative;

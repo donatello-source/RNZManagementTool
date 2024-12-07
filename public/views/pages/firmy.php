@@ -5,7 +5,13 @@ if (!isset($_SESSION['user'])) {
     header('Location: /RNZManagementTool/public/views/index.php');
     exit();
 }
+
 $user = $_SESSION['user'];
+
+if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status'] !== 'szef' ){
+    header('Location: /RNZManagementTool/public/views/index.php');
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -31,20 +37,22 @@ $user = $_SESSION['user'];
         </div>
         <div class="profile-link">
             <a href="profile.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
+            <div id="userStatus" hidden><?= $user['status'] ?></div>
         </div>
-        <div class="logout-button">
-            <a href="/RNZManagementTool/security/logout">Wyloguj się</a>
-        </div>
+        <form class="logout" action="/RNZManagementTool/logout" method="POST">
+            <button class="logoutBtn" type="submit">Wyloguj się</button>
+        </form>
     </header>
     <div class="container">
         <aside class="sidebar">
             <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
-                    <li><a href="main.html">Home</a></li>
+                    <li><a href="main.php">Home</a></li>
                     <li><a href="pracownicy.php">Pracownicy</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
                     <li><a href="wyplaty.php">Wyplaty</a></li>
+                    <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
                 </ul>
             </nav>

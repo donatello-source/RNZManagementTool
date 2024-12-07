@@ -22,7 +22,7 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
         $action = explode("/", $url)[0];
     
-        var_dump($method, $action, self::$routes); // DEBUG
+        //var_dump($method, $action, self::$routes);
     
         if (!array_key_exists($action, self::$routes[$method])) {
             http_response_code(404);
@@ -32,7 +32,7 @@ class Router
         $controller = self::$routes[$method][$action];
         $object = new $controller;
         if (empty($action)) {
-            $action = 'index'; // lub inna domyślna metoda
+            $action = 'index';
         }
         
         if (!method_exists($object, $action)) {

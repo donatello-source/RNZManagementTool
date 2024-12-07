@@ -102,7 +102,24 @@ textarea {
     font-weight: bold;
 }
 
-button[type="submit"] {
+#remove-event-btn {
+    width: 100px;
+    padding: 15px;
+    background-color: red;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#remove-event-btn:hover {
+    background-color: rgb(184, 0, 0);
+}
+
+#edit-event-btn #save-event-btn {
     width: 100%;
     padding: 15px;
     background-color: #4caf50;
@@ -111,9 +128,10 @@ button[type="submit"] {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-weight: bold;
 }
 
-button[type="submit"]:hover {
+#edit-event-btn #save-event-btn:hover {
     background-color: #45a049;
 }
 
@@ -248,6 +266,10 @@ button[type="submit"]:hover {
     cursor: pointer;
     background-color: #f9f9f9;
     transition: background-color 0.3s;
+}
+
+.clickable-cell:hover {
+    background-color: #d1d1d1;
 }
 
 .clickable-cell.selected {

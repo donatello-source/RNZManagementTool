@@ -16,8 +16,7 @@ $path = ltrim($path, '/');
 
 
 Router::get('', 'SecurityController'); // Strona logowania
-//Router::get('dashboard', 'SecurityController'); // Przykład dashboardu
-Router::get('security/logout', 'SecurityController@logout');
-Router::post('login', 'SecurityController'); // Obsługa logowania
+Router::post('logout', 'SecurityController');
+Router::post('login', 'SecurityController');
 
 Router::run($path);

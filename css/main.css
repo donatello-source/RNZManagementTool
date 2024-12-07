@@ -35,6 +35,7 @@
 }
 
 .event-card {
+    cursor: pointer;
     background-color: #e3f7e0;
     /* Domyślny kolor */
     padding: 15px;

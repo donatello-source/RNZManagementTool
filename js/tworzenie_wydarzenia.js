@@ -159,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('event-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-
         const formData = new FormData(event.target);
         const eventData = Object.fromEntries(formData.entries());
         eventData.pracownicy = selectedPracownicy.map(pracownik => pracownik.IdOsoba);

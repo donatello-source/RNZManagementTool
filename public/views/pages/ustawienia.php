@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user'])) {
+    header('Location: /RNZManagementTool/public/views/index.php');
+    exit();
+}
+$user = $_SESSION['user'];
+?>
+
 <!DOCTYPE php>
 <html lang="pl">
 
@@ -20,8 +30,12 @@
             <div>Nie ma problemów, są tylko wyzwania do rozwiązania</div>
         </div>
         <div class="profile-link">
-            <a href="/profile.php">Jan Nowak</a>
+            <a href="profile.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
+            <div id="userStatus" hidden><?= $user['status'] ?></div>
         </div>
+        <form class="logout" action="/RNZManagementTool/logout" method="POST">
+            <button class="logoutBtn" type="submit">Wyloguj się</button>
+        </form>
     </header>
     <div class="container">
         <aside class="sidebar">
@@ -33,6 +47,7 @@
                     <li><a href="wyplaty.php">Wyplaty</a></li>
                     <li><a href="firmy.php">Firmy</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
+                    <li><a href="stanowiska.php">Stanowiska</a></li>
                 </ul>
             </nav>
         </aside>

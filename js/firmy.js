@@ -16,7 +16,7 @@ function displayFirms(data) {
         firmContainer.innerHTML = ''; // Wyczyść zawartość
         data.forEach(firm => {
             firmContainer.innerHTML += `
-                <div class="firm-card" onclick="location.href='../pages/profil_firma.html?id=${firm.IdFirma}';">
+                <div class="firm-card" onclick="location.href='profil_firma.php?id=${firm.IdFirma}';">
                     <div class='firm-name'>${firm.NazwaFirmy}</div>
                     <div class='firm-phone'>Telefon: ${firm.Telefon || 'Brak numeru'}</div>
                 </div>

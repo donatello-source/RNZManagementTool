@@ -1,9 +1,6 @@
 RewriteEngine On
 
-# Obsługa trasy logout
-RewriteCond %{REQUEST_URI} ^/RNZManagementTool/?route=security/logout$
-RewriteRule ^$ /RNZManagementTool/index.php?route=security/logout [L]
-
-# Reguła dla strony logowania
-RewriteCond %{REQUEST_URI} ^/RNZManagementTool/login$ [NC]
-RewriteRule ^login$ /RNZManagementTool/index.php?route=login [L]
+# Przekierowanie wszystkich żądań na index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
