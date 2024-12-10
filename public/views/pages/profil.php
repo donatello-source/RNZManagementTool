@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /RNZManagementTool/public/views/index.php');
+    header('Location: /RNZManagementTool/');
     exit();
 }
 $user = $_SESSION['user'];
@@ -41,20 +41,28 @@ $user = $_SESSION['user'];
             <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
+                    <?php if ($_SESSION['user']['status'] === 'administrator' || $_SESSION['user']['status'] === 'szef' ): ?>
                     <li><a href="main.php">Home</a></li>
-                    <li><a href="pracownicy.php">Pracownicy</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
-                    <li><a href="wyplaty.php">Wyplaty</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="firmy.php">Firmy</a></li>
                     <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php else: ?>
+                    <li><a href="main.php">Home</a></li>
+                    <li><a href="wydarzenia.php">Wydarzenia</a></li>
+                    <li><a href="rejestracja_pracy.php">Rejestracja Pracy</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php">Wypłaty</a></li>
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php endif; ?>
                 </ul>
             </nav>
         </aside>
-        <main id="employee-profile">
+        <form id="employee-profile">
             <!-- Tutaj będą wyświetlane dane pracownika -->
-        </main>
-
+        </form>
     </div>
 
     <script src="../../../js/profil.js"></script>

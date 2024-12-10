@@ -2,19 +2,18 @@
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /RNZManagementTool/public/views/index.php');
+    header('Location: /RNZManagementTool/');
     exit();
 }
 $user = $_SESSION['user'];
 ?>
-
-<!DOCTYPE php>
+<!DOCTYPE html>
 <html lang="pl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Główna</title>
+    <title>Wypłaty</title>
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../../css/global.css">
@@ -42,30 +41,32 @@ $user = $_SESSION['user'];
             <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
+                    <?php if ($_SESSION['user']['status'] === 'administrator' || $_SESSION['user']['status'] === 'szef' ): ?>
                     <li><a href="main.php">Home</a></li>
-                    <li><a href="pracownicy.php">Pracownicy</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php" class="selected">Wypłaty</a></li>
                     <li><a href="firmy.php">Firmy</a></li>
                     <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php else: ?>
+                    <li><a href="main.php">Home</a></li>
+                    <li><a href="wydarzenia.php">Wydarzenia</a></li>
+                    <li><a href="rejestracja_pracy.php">Rejestracja Pracy</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php" class="selected">Wypłaty</a></li>
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php endif; ?>
+
                 </ul>
             </nav>
         </aside>
         <main class="content">
-            <div class="events">
 
-            </div>
         </main>
     </div>
-
-    <script>
-    const menuToggle = document.querySelector(".menu-toggle");
-    const sidebar = document.querySelector(".sidebar");
-
-    menuToggle.addEventListener("click", () => {
-        sidebar.classList.toggle("active");
-    });
-    </script>
+    <script></script>
+    <script src="../../../js/global.js"></script>
 </body>
 
 </html>

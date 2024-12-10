@@ -13,11 +13,11 @@ $user = $_SESSION['user'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wydarzenie</title>
+    <title>Strona Główna</title>
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../../css/global.css">
-    <link rel="stylesheet" href="../../../css/wydarzenie.css">
+    <link rel="stylesheet" href="../../../css/rejestracja_pracy.css">
 </head>
 
 <body>
@@ -60,67 +60,11 @@ $user = $_SESSION['user'];
                 </ul>
             </nav>
         </aside>
-        <main class="event-container">
-            <h1>Szczegóły wydarzenia</h1>
-            <form id="event-form">
-                <div class="form-group">
-                    <label for="nazwaWydarzenia">Nazwa</label>
-                    <input type="text" id="nazwaWydarzenia" name="nazwaWydarzenia" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="firma">Firma</label>
-                    <input type="text" id="firma" name="firma" list="firm-list" disabled>
-                    <datalist id="firm-list">
-                    </datalist>
-                </div>
+        <main class="content">
 
-                <div class="form-group">
-                    <label for="miejsce">Miejsce</label>
-                    <input type="text" id="miejsce" name="miejsce" disabled>
-                </div>
-
-                <div class="form-group">
-                    <label for="data-poczatek">Data Początek</label>
-                    <input type="date" id="data-poczatek" name="data-poczatek" disabled>
-                </div>
-
-                <div class="form-group" id="data-koniec-container">
-                    <label for="data-koniec">Data Koniec</label>
-                    <input type="date" id="data-koniec" name="data-koniec" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="pracownicy">Pracownicy</label>
-                    <div id="pracownicy-container">
-                        <span id="add-pracownik-btn" class="add-btn">+</span>
-                        <div id="pracownicy-dropdown" class="hidden"></div>
-                    </div>
-                </div>
-                <div id="schedule-table-container">
-                    <table id="schedule-table"></table>
-                </div>
-
-
-                <div class="form-group">
-                    <label for="hotel">Hotel</label>
-                    <input type="text" id="hotel" name="hotel" disabled>
-                </div>
-
-                <div class="form-group">
-                    <label for="osoba-zarzadzajaca">Osoba zarządzająca</label>
-                    <input type="text" id="osoba-zarzadzajaca" name="osoba-zarzadzajaca" disabled>
-                </div>
-
-                <div class="form-group">
-                    <label for="komentarz">Komentarz</label>
-                    <textarea id="komentarz" name="komentarz" disabled></textarea>
-                </div>
-
-                <button type="button" id="edit-event-btn">Edytuj wydarzenie</button>
-            </form>
         </main>
-
     </div>
-    <script src="../../../js/wydarzenie.js"></script>
+
     <script src="../../../js/global.js"></script>
 </body>
 

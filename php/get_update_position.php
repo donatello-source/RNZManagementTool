@@ -27,22 +27,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         'powiazania' => $powiazania,
     ]);
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Aktualizacja danych
     $input = json_decode(file_get_contents('php://input'), true);
 
-    if (!isset($input['powiazania'])) {
+    if (!isset($input['powiazania']) && !isset($input['usunPowiazania'])) {
         echo json_encode(['error' => 'Brak danych do zapisania']);
         exit;
     }
 
-    $mysqli->query("DELETE FROM stanowiskoosoba");
-    foreach ($input['powiazania'] as $powiazanie) {
-        $idOsoba = intval($powiazanie['IdOsoba']);
-        $idStanowiska = intval($powiazanie['IdStanowiska']);
-        $mysqli->query("INSERT INTO stanowiskoosoba (IdOsoba, IdStanowiska) VALUES ($idOsoba, $idStanowiska)");
+    $response = [];
+
+    if (isset($input['powiazania'])) {
+        foreach ($input['powiazania'] as $powiazanie) {
+            $idOsoba = intval($powiazanie['IdOsoba']);
+            $idStanowiska = intval($powiazanie['IdStanowiska']);
+
+            $checkQuery = "
+                SELECT * FROM stanowiskoosoba
+                WHERE IdOsoba = $idOsoba AND IdStanowiska = $idStanowiska
+            ";
+            $checkResult = $mysqli->query($checkQuery);
+
+            if ($checkResult->num_rows === 0) {
+                $insertQuery = "
+                    INSERT INTO stanowiskoosoba (IdOsoba, IdStanowiska)
+                    VALUES ($idOsoba, $idStanowiska)
+                ";
+                if ($mysqli->query($insertQuery)) {
+                    $response[] = "Dodano powiązanie: Osoba $idOsoba -> Stanowisko $idStanowiska.";
+                } else {
+                    $response[] = "Błąd przy dodawaniu powiązania: " . $mysqli->error;
+                }
+            }
+        }
     }
 
-    echo json_encode(['message' => 'Dane zaktualizowane pomyślnie']);
+    if (isset($input['usunPowiazania'])) {
+        foreach ($input['usunPowiazania'] as $powiazanie) {
+            $idOsoba = intval($powiazanie['IdOsoba']);
+            $idStanowiska = intval($powiazanie['IdStanowiska']);
+
+            $deleteQuery = "
+                DELETE FROM stanowiskoosoba
+                WHERE IdOsoba = $idOsoba AND IdStanowiska = $idStanowiska
+            ";
+            if ($mysqli->query($deleteQuery)) {
+                $response[] = "Usunięto powiązanie: Osoba $idOsoba -> Stanowisko $idStanowiska.";
+            } else {
+                $response[] = "Błąd przy usuwaniu powiązania: " . $mysqli->error;
+            }
+        }
+    }
+
+    echo json_encode([
+        'message' => 'Dane zaktualizowane pomyślnie',
+        'details' => $response,
+    ]);
 }
 
 $mysqli->close();

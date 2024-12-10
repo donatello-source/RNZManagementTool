@@ -49,3 +49,22 @@
 #positions-table td.clickable:hover {
     background-color: #d1d1d1;
 }
+
+#positions-table td.selected:hover {
+    background-color: #910000;
+}
+
+#save-positions {
+    width: 100%;
+    padding: 15px;
+    background-color: rgb(15, 156, 39);
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#save-positions:hover {
+    background-color: rgb(43, 105, 46);
+}

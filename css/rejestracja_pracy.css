@@ -1,10 +1,8 @@
-/* Sekcja główna */
 .content {
     flex: 1;
     background-color: #222222;
     padding: 1em;
     overflow-y: auto;
-    /* Scroll tylko w sekcji głównej */
 }
 
 
@@ -37,6 +35,7 @@
 .event-card {
     cursor: pointer;
     background-color: #e3f7e0;
+    /* Domyślny kolor */
     padding: 15px;
     border-radius: 10px;
 }
@@ -48,30 +47,6 @@
 .event-card.orange {
     background-color: #ffe8cc;
 }
-
-.event-card.grey {
-    margin-top: 15px;
-    background-color: #818181;
-}
-
-
-.past-events-header {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    cursor: pointer;
-    margin-top: 20px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.arrow {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
-
 
 @media (max-width: 720px) {
     .content {

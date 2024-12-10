@@ -2,13 +2,13 @@
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /RNZManagementTool/public/views/index.php');
+    header('Location: /RNZManagementTool/');
     exit();
 }
 $user = $_SESSION['user'];
 
 if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status'] !== 'szef' ){
-    header('Location: /RNZManagementTool/public/views/index.php');
+    header('Location: /RNZManagementTool/');
     exit();
 }
 ?>
@@ -46,12 +46,23 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
             <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
+                    <?php if ($_SESSION['user']['status'] === 'administrator' || $_SESSION['user']['status'] === 'szef' ): ?>
                     <li><a href="main.php">Home</a></li>
-                    <li><a href="pracownicy.php">Pracownicy</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
-                    <li><a href="wyplaty.php">Wyplaty</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="firmy.php">Firmy</a></li>
+                    <li><a href="stanowiska.php" class="selected">Stanowiska</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php else: ?>
+                    <li><a href="main.php">Home</a></li>
+                    <li><a href="wydarzenia.php">Wydarzenia</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php">Wypłaty</a></li>
+                    <li><a href="firmy.php">Firmy</a></li>
+                    <li><a href="stanowiska.php" class="selected">Stanowiska</a></li>
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php endif; ?>
                 </ul>
             </nav>
         </aside>
@@ -61,11 +72,9 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
                 <thead>
                     <tr>
                         <th>Pracownik</th>
-                        <!-- Dynamiczne nagłówki -->
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Dynamiczne dane -->
                 </tbody>
             </table>
             <button id="save-positions">Zapisz zmiany</button>
@@ -82,7 +91,6 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
 
         let data = {};
 
-        // Pobieranie danych z serwera
         fetch("http://localhost/RNZManagementTool/php/get_update_position.php")
             .then(response => response.json())
             .then(responseData => {
@@ -99,18 +107,22 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
             const thead = table.querySelector("thead tr");
             const tbody = table.querySelector("tbody");
 
-            // Dodanie nagłówków
             stanowiska.forEach(stanowisko => {
                 const th = document.createElement("th");
                 th.textContent = stanowisko.NazwaStanowiska;
                 thead.appendChild(th);
             });
 
-            // Dodanie danych
             pracownicy.forEach(pracownik => {
                 const row = document.createElement("tr");
                 const nameCell = document.createElement("td");
-                nameCell.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
+                const link = document.createElement("a");
+                link.href =
+                    `profil.php?id=${pracownik.IdOsoba}`;
+                link.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
+                link.style.textDecoration = "none";
+                link.style.color = "inherit";
+                nameCell.appendChild(link);
                 row.appendChild(nameCell);
 
                 stanowiska.forEach(stanowisko => {
@@ -139,16 +151,22 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
             });
         }
 
-        // Zapisanie zmian
         saveButton.addEventListener("click", () => {
             const updatedPowiazania = [];
-            const cells = table.querySelectorAll("td.clickable.selected");
+            const removedPowiazania = [];
+            const cells = table.querySelectorAll("td.clickable");
 
             cells.forEach(cell => {
-                updatedPowiazania.push({
+                const powiazanie = {
                     IdOsoba: cell.dataset.idOsoba,
                     IdStanowiska: cell.dataset.idStanowiska,
-                });
+                };
+
+                if (cell.classList.contains("selected")) {
+                    updatedPowiazania.push(powiazanie);
+                } else {
+                    removedPowiazania.push(powiazanie);
+                }
             });
 
             fetch("http://localhost/RNZManagementTool/php/get_update_position.php", {
@@ -157,14 +175,21 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        powiazania: updatedPowiazania
+                        powiazania: updatedPowiazania,
+                        usunPowiazania: removedPowiazania,
                     }),
                 })
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
+                    //console.log(data.details);
+                })
+                .catch(error => {
+                    console.error('Błąd podczas zapisywania zmian:', error);
                 });
         });
+
+
     });
     </script>
 

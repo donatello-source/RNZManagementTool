@@ -2,37 +2,63 @@
 // Ustawienie nagłówków CORS
 header('Content-Type: application/json');
 $host = 'localhost';
-$dbname = 'rnzmanago';  // Nazwa Twojej bazy danych
-$user = 'root';         // Domyślny użytkownik MySQL w XAMPP
-$pass = '';             // Domyślne hasło w XAMPP (pusty)
+$dbname = 'rnzmanago';
+$user = 'root';
+$pass = '';
 
-// Sprawdzenie, czy parametr 'id' został przekazany w URL
 if (isset($_GET['id'])) {
-    $employeeId = $_GET['id'];
+    $employeeId = intval($_GET['id']); // Zabezpieczenie przed SQL Injection
 
-    // Połączenie z bazą danych
     $mysqli = new mysqli($host, $user, $pass, $dbname);
 
     if ($mysqli->connect_error) {
-        die(json_encode(['error' => 'Błąd połączenia z bazą danych'])); // Zwróć błąd w formacie JSON
+        die(json_encode(['error' => 'Błąd połączenia z bazą danych']));
     }
 
-    // Zapytanie do bazy danych, aby pobrać dane konkretnego pracownika
-    $query = "SELECT * FROM osoby WHERE idOsoba = $employeeId"; // Używaj prawidłowego idOsoba
+    // Zapytanie o szczegóły pracownika
+    $query = "
+        SELECT 
+            o.*, 
+            st.NazwaStanowiska, 
+            so.Stawka,
+            st.IdStanowiska
+        FROM osoby o
+        LEFT JOIN stanowiskoosoba so ON so.IdOsoba = o.IdOsoba
+        LEFT JOIN stanowiska st ON st.IdStanowiska = so.IdStanowiska
+        WHERE o.IdOsoba = $employeeId
+    ";
 
-    // Wykonanie zapytania
     $result = $mysqli->query($query);
 
     if ($result->num_rows > 0) {
-        $pracownik = $result->fetch_assoc(); // Zwróć tylko jeden wiersz, bo szukasz konkretnego pracownika
-        
-        // Zwrócenie wyników w formacie JSON
+        $pracownik = [];
+        while ($row = $result->fetch_assoc()) {
+            if (empty($pracownik)) {
+                $pracownik = [
+                    'Imie' => $row['Imie'],
+                    'Nazwisko' => $row['Nazwisko'],
+                    'NumerTelefonu' => $row['NumerTelefonu'],
+                    'Email' => $row['Email'],
+                    'AdresZamieszkania' => $row['AdresZamieszkania'],
+                    'Status' => $row['Status'],
+                    'kolor' => $row['kolor'],
+                    'stanowiska' => []
+                ];
+            }
+
+            if ($row['NazwaStanowiska']) {
+                $pracownik['stanowiska'][] = [
+                    'NazwaStanowiska' => $row['NazwaStanowiska'],
+                    'Stawka' => $row['Stawka'],
+                    'IdStanowiska' => $row['IdStanowiska']
+                ];
+            }
+        }
         echo json_encode($pracownik);
     } else {
         echo json_encode(['message' => 'Brak pracownika w bazie']);
     }
 
-    // Zamknięcie połączenia z bazą danych
     $mysqli->close();
 } else {
     echo json_encode(['error' => 'Brak parametru ID']);

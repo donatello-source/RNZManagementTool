@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /RNZManagementTool/public/views/index.php');
+    header('Location: /RNZManagementTool/');
     exit();
 }
 $user = $_SESSION['user'];
@@ -41,18 +41,26 @@ $user = $_SESSION['user'];
             <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
-                    <li><a href="main.html">Home</a></li>
-                    <li><a href="pracownicy.html">Pracownicy</a></li>
-                    <li><a href="wydarzenia.html">Wydarzenia</a></li>
-                    <li><a href="wyplaty.html">Wyplaty</a></li>
-                    <li><a href="firmy.html">Firmy</a></li>
+                    <?php if ($_SESSION['user']['status'] === 'administrator' || $_SESSION['user']['status'] === 'szef' ): ?>
+                    <li><a href="main.php">Home</a></li>
+                    <li><a href="wydarzenia.php">Wydarzenia</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php">Wypłaty</a></li>
+                    <li><a href="firmy.php">Firmy</a></li>
                     <li><a href="stanowiska.php">Stanowiska</a></li>
-                    <li><a href="ustawienia.html">Ustawienia</a></li>
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php else: ?>
+                    <li><a href="main.php">Home</a></li>
+                    <li><a href="wydarzenia.php">Wydarzenia</a></li>
+                    <li><a href="rejestracja_pracy.php">Rejestracja Pracy</a></li>
+                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="wyplaty.php">Wypłaty</a></li>
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <?php endif; ?>
                 </ul>
             </nav>
         </aside>
         <main id="firm-profile">
-            <!-- Tutaj będą wyświetlane dane pracownika -->
         </main>
     </div>
     <script src="../../../js/profil_firma.js"></script>

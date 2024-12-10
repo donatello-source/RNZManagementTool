@@ -63,7 +63,7 @@ function displayEmployeeProfile(employee) {
     if (profileContainer) {
         const complementaryColor = getComplementaryColor(employee.kolor);
 
-        profileContainer.innerHTML = `
+        let profileHTML = `
     <div class="employee-card">
         <div class="profil-name">
             <label for="employee-name">Imię i nazwisko:</label>
@@ -82,21 +82,125 @@ function displayEmployeeProfile(employee) {
             <input type="text" id="employee-address" value="${employee.AdresZamieszkania}" readonly>
         </div>
         <div class="profil-state">
-            <label for="employee-position">Stanowisko:</label>
+            <label for="employee-position">Status:</label>
             <input type="text" id="employee-position" value="${employee.Status}" readonly>
         </div>
-    </div>
+    `;
 
-    <style>
-        #employee-profile {
-            background-color: ${employee.kolor};
+        if (employee.stanowiska.length > 0) {
+            profileHTML += `<div class="profil-position">`;
+            employee.stanowiska.forEach((stanowisko) => {
+                if (stanowisko.Stawka == null) {
+                    stanowisko.Stawka = 0;
+                }
+                profileHTML += `
+                <div class="position-row">
+                    <label for="position-salary-${stanowisko.IdStanowiska}">${stanowisko.NazwaStanowiska} stawka:</label>
+                    <input type="text" id="position-salary-${stanowisko.IdStanowiska}" value="${stanowisko.Stawka}" readonly>
+                </div>
+            `;
+            });
+            profileHTML += `
+                    </div>
+            </div>`;
         }
-        #employee-profile label {
-            color: ${complementaryColor};
-        }
-    </style>
-`;
+
+        profileHTML += `
+        <button type="button" id="edit-profil-btn">Edytuj Pracownika</button>
+        <style>
+            #employee-profile {
+                background-color: ${employee.kolor};
+            }
+            #employee-profile label {
+                color: ${complementaryColor};
+            }
+        </style>
+    `;
+
+        profileContainer.innerHTML = profileHTML;
     } else {
         console.error('Element #employee-profile nie został znaleziony.');
     }
+    const editProfilButton = document.getElementById("edit-profil-btn");
+    editProfilButton.addEventListener("click", handleEditProfile);
 }
+
+
+function enableFormEditing() {
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = `Usuń Pracownika`;
+    deleteBtn.id = "remove-profil-btn";
+    deleteBtn.type = "button";
+    deleteBtn.addEventListener("click", handleDeleteProfile);
+    document.getElementById('employee-profile').appendChild(deleteBtn);
+
+    document.querySelectorAll("#employee-profile input").forEach(input => {
+        input.disabled = false;
+        input.readOnly = false;
+    });
+}
+function handleDeleteProfile() {
+    if (employeeId && confirm("Czy na pewno chcesz usunąć tego pracownika?")) {
+        fetch(`http://localhost/RNZManagementTool/php/delete_employee.php?id=${employeeId}`, {
+            method: "DELETE",
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Pracownik został usunięty!");
+                    window.location.href = "/RNZManagementTool/public/views/pages/pracownicy.php";
+                } else {
+                    alert("Błąd podczas usuwania pracownika: " + (data.message || 'Nieznany błąd'));
+                }
+            })
+            .catch(error => console.error("Błąd:", error));
+    }
+}
+
+const handleEditProfile = () => {
+    enableFormEditing();
+    const editProfilButton = document.getElementById("edit-profil-btn");
+    editProfilButton.textContent = "Zapisz Pracownika";
+    editProfilButton.id = "save-profil-btn";
+    editProfilButton.removeEventListener("click", handleEditProfile);
+    editProfilButton.addEventListener("click", handleSaveProfile);
+};
+const handleSaveProfile = async () => {
+    const employeeId = getQueryParam('id');
+    const updatedData = {
+        Imie: document.getElementById("employee-name").value.split(" ")[0],
+        Nazwisko: document.getElementById("employee-name").value.split(" ")[1],
+        NumerTelefonu: document.getElementById("employee-phone").value,
+        Email: document.getElementById("employee-mail").value,
+        AdresZamieszkania: document.getElementById("employee-address").value,
+        Status: document.getElementById("employee-position").value,
+        stanowiska: [],
+    };
+
+    // Pobieramy stawki stanowiskowe
+    if (updatedData.stanowiska.length > 0) {
+        document.querySelectorAll(".position-row input").forEach((input, index) => {
+            updatedData.stanowiska.push({
+                IdStanowiska: input.id.split('-').pop(),
+                Stawka: input.value,
+            });
+        });
+    };
+
+    try {
+        const response = await fetch(`http://localhost/RNZManagementTool/php/update_employee.php?id=${employeeId}`, {
+            method: "POST",
+            body: JSON.stringify(updatedData),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const result = await response.json();
+        alert(result.message);
+        window.location.reload();
+
+    } catch (error) {
+        console.error("Błąd podczas aktualizacji pracownika:", error);
+    }
+};
