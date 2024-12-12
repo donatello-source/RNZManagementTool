@@ -10,7 +10,7 @@ let activeFilters = {
 
 async function fetchFirms() {
     try {
-        const response = await fetch("http://localhost/RNZManagementTool/php/get_firms.php");
+        const response = await fetch("/RNZManagementTool/getAllFirms");
         const companies = await response.json();
         const dataList = document.getElementById('companies-datalist');
         dataList.innerHTML = companies.map(company => `<option value="${company.NazwaFirmy}">`).join('');
@@ -22,7 +22,7 @@ fetchFirms();
 
 async function fetchPracownicy() {
     try {
-        const response = await fetch('http://localhost/RNZManagementTool/php/get_pracownicy.php');
+        const response = await fetch('/RNZManagementTool/getAllEmployees');
         employees = await response.json();
         const dataList = document.getElementById('employees-datalist');
         dataList.innerHTML = employees.map(employee => `<option value="${employee.Imie} ${employee.Nazwisko}">`).join('');
@@ -59,36 +59,30 @@ function removeChip(button, value, containerId, filterKey) {
     container.removeChild(button.parentElement);
 }
 
-// Dodawanie miejsc
 document.getElementById('add-place-button').addEventListener('click', () => {
     addChip('filter-place-input', 'filter-places-list', 'places');
 });
 
-// Dodawanie firm
 document.getElementById('add-company-button').addEventListener('click', () => {
     addChip('filter-company-input', 'filter-companies-list', 'companies');
 });
 
-// Dodawanie pracowników
 document.getElementById('add-employee-button').addEventListener('click', () => {
     addChip('filter-employee-input', 'filter-employees-list', 'employees');
 });
 
-// Obsługa zmiany trybu pracowników
 document.querySelectorAll('input[name="employee-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         activeFilters.employeeMode = e.target.value;
     });
 });
 
-// Zastosowanie filtrów
 document.getElementById('apply-filters-button').addEventListener('click', () => {
     activeFilters.dateStart = document.getElementById('filter-date-start').value;
     activeFilters.dateEnd = document.getElementById('filter-date-end').value;
     filterAndDisplayEvents();
 });
 
-// Czyszczenie filtrów
 document.getElementById('clear-filters-button').addEventListener('click', () => {
     activeFilters = {
         places: [],
@@ -117,20 +111,16 @@ function removeFilter(listId, item) {
 
 function filterAndDisplayEvents() {
     const filteredEvents = allEvents.filter(event => {
-        // Filtr miejsca
         const matchesPlace = !activeFilters.places.length || activeFilters.places.includes(event.Miejsce);
 
-        // Filtr firmy
         const matchesCompany = !activeFilters.companies.length || activeFilters.companies.includes(event.NazwaFirmy);
 
-        // Filtr daty
         const eventStart = new Date(event.DataPoczatek);
         const eventEnd = new Date(event.DataKoniec);
         const filterStart = activeFilters.dateStart ? new Date(activeFilters.dateStart) : null;
         const filterEnd = activeFilters.dateEnd ? new Date(activeFilters.dateEnd) : null;
         const matchesDate = (!filterStart || eventEnd >= filterStart) && (!filterEnd || eventStart <= filterEnd);
 
-        // Filtr pracowników
         const employeeIds = event.ListaPracownikow.map(e => e.Imie + ' ' + e.Nazwisko);
         const matchesEmployees = activeFilters.employeeMode === 'all'
             ? activeFilters.employees.every(emp => employeeIds.includes(emp))
@@ -145,7 +135,7 @@ function filterAndDisplayEvents() {
 
 async function fetchEvents() {
     try {
-        const response = await fetch('http://localhost/RNZManagementTool/php/get_events.php');
+        const response = await fetch('/RNZManagementTool/getDetailedEvents');
         const events = await response.json();
         allEvents = events;
         displayEvents(events);
@@ -181,7 +171,6 @@ document.getElementById('search-input').addEventListener('input', (event) => {
 function displayEvents(events) {
     const eventsContainer = document.getElementById('events-container');
     eventsContainer.innerHTML = '';
-    //console.log(events[0]);
 
 
     events.forEach(event => {

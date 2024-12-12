@@ -45,15 +45,16 @@ $user = $_SESSION['user'];
                     <li><a href="main.php">Home</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
                     <li><a href="pracownicy.php" class="selected">Pracownicy</a></li>
-                    <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="firmy.php">Firmy</a></li>
                     <li><a href="stanowiska.php">Stanowiska</a></li>
+                    <li><a href="czas_pracy.php">Czas Pracy</a></li>
+                    <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
                     <?php else: ?>
                     <li><a href="main.php">Home</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
-                    <li><a href="rejestracja_pracy.php">Rejestracja Pracy</a></li>
                     <li><a href="pracownicy.php" class="selected">Pracownicy</a></li>
+                    <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
                     <?php endif; ?>

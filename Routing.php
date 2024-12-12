@@ -2,6 +2,8 @@
 
 require_once 'src/controllers/AppController.php';
 require_once 'src/controllers/SecurityController.php';
+require_once 'src/controllers/MainController.php';
+
 
 class Router
 {
@@ -22,7 +24,6 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
         $action = explode("/", $url)[0];
     
-        //var_dump($method, $action, self::$routes);
     
         if (!array_key_exists($action, self::$routes[$method])) {
             http_response_code(404);

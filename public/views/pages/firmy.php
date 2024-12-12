@@ -9,7 +9,7 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 
 if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status'] !== 'szef' ){
-    header('Location: /RNZManagementTool/');
+    header('Location: /RNZManagementTool/public/views/main.php');
     exit();
 }
 ?>
@@ -48,29 +48,19 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
             <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
-                    <?php if ($_SESSION['user']['status'] === 'administrator' || $_SESSION['user']['status'] === 'szef' ): ?>
                     <li><a href="main.php">Home</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
                     <li><a href="pracownicy.php">Pracownicy</a></li>
-                    <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="firmy.php" class="selected">Firmy</a></li>
                     <li><a href="stanowiska.php">Stanowiska</a></li>
-                    <li><a href="ustawienia.php">Ustawienia</a></li>
-                    <?php else: ?>
-                    <li><a href="main.php">Home</a></li>
-                    <li><a href="wydarzenia.php">Wydarzenia</a></li>
-                    <li><a href="pracownicy.php">Pracownicy</a></li>
+                    <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
-                    <li><a href="firmy.php" class="selected">Firmy</a></li>
-                    <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
-                    <?php endif; ?>
                 </ul>
             </nav>
         </aside>
         <main class="content">
             <div id="firm-container" class="firm-list">
-                <!-- Dane zostaną załadowane tutaj przez JS -->
             </div>
         </main>
     </div>

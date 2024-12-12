@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pobierz firmy z bazy
     async function fetchFirms() {
         try {
-            const response = await fetch("http://localhost/RNZManagementTool/php/get_firms.php");
+            const response = await fetch("/RNZManagementTool/getAllFirms");
             const firms = await response.json();
             firms.forEach(firm => {
                 const option = document.createElement('option');
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchPracownicy() {
         try {
-            const response = await fetch('http://localhost/RNZManagementTool/php/get_pracownicy.php');
+            const response = await fetch('/RNZManagementTool/getAllEmployees');
             const pracownicy = await response.json();
             pracownicyList = pracownicy;
             pracownicyDropdown.innerHTML = '';
@@ -98,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `rgb(${compR}, ${compG}, ${compB})`;
     }
 
-    // Funkcja dodająca pracownika do listy
     function addPracownikToList(pracownik) {
         if (selectedPracownicy.some(p => p.IdOsoba === pracownik.IdOsoba)) {
             alert('Ten pracownik został już dodany!');
@@ -127,25 +126,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         pracownicyContainer.insertBefore(pracownikItem, addPracownikBtn);
 
-        pracownicyDropdown.classList.remove('active'); // Schowaj dropdown
+        pracownicyDropdown.classList.remove('active');
         generateTable(selectedPracownicy);
     }
     function updateDropdownPosition() {
-        const rect = addPracownikBtn.getBoundingClientRect(); // Pobieramy pozycję przycisku "+" w oknie
-        pracownicyDropdown.style.top = `${rect.bottom + window.scrollY + 5}px`; // Ustawiamy dropdown tuż pod przyciskiem
-        pracownicyDropdown.style.left = `${rect.left + window.scrollX}px`; // Ustawiamy lewą krawędź dropdowna
+        const rect = addPracownikBtn.getBoundingClientRect();
+        pracownicyDropdown.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        pracownicyDropdown.style.left = `${rect.left + window.scrollX}px`;
     }
 
-    // Obsługa kliknięcia "+" przycisku
     addPracownikBtn.addEventListener("click", () => {
         pracownicyDropdown.classList.toggle("active");
         if (pracownicyDropdown.classList.contains("active")) {
-            updateDropdownPosition(); // Aktualizujemy pozycję dropdowna, gdy się pojawi
+            updateDropdownPosition();
         }
     });
 
 
-    // Ukryj dropdown, jeśli kliknięto poza nim
     document.addEventListener('click', (event) => {
         if (!pracownicyContainer.contains(event.target) && !pracownicyDropdown.contains(event.target)) {
             pracownicyDropdown.classList.remove('active');
@@ -166,8 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.keys(selectedDays).forEach(pracownikId => {
             eventData.dni[pracownikId] = selectedDays[pracownikId]; // Przypisz dni z selectedDays
         });
+        console.log(eventData);
         try {
-            const response = await fetch('http://localhost/RNZManagementTool/php/add_event.php', {
+            const response = await fetch('/RNZManagementTool/addEvent', {
                 method: 'POST',
                 body: JSON.stringify(eventData),
                 headers: {

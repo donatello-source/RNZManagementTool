@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchPracownicy() {
         try {
-            const response = await fetch('http://localhost/RNZManagementTool/php/get_pracownicy.php');
+            const response = await fetch('/RNZManagementTool/getAllEmployees');
             pracownicyList = await response.json();
             populateDropdown();
         } catch (error) {
@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchFirms() {
         try {
-            const response = await fetch("http://localhost/RNZManagementTool/php/get_firms.php");
+            const response = await fetch("/RNZManagementTool/getAllFirms");
             const firms = await response.json();
             firms.forEach(firm => {
                 const option = document.createElement('option');
@@ -300,11 +300,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchEventDetails(id) {
         try {
-            const response = await fetch(`http://localhost/RNZManagementTool/php/get_event.php?id=${id}`);
+            const response = await fetch(`/RNZManagementTool/getEvent?id=${id}`);
             const data = await response.json();
-            if (response.ok && data.length > 0) {
-                dataForAll = data[0];
-                populateEventDetails(data[0]);
+
+            if (response.ok && data) {
+                dataForAll = data;
+                populateEventDetails(data);
             } else {
                 alert(data.message || "Błąd podczas pobierania danych");
             }
@@ -366,7 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const handleDeleteEvent = async () => {
         try {
-            const response = await fetch(`http://localhost/RNZManagementTool/php/delete_event.php?id=${eventId}`, {
+            const response = await fetch(`/RNZManagementTool/deleteEvent?id=${eventId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             });
@@ -405,7 +406,7 @@ document.getElementById("event-form").addEventListener("submit", async (event) =
     console.log(eventData.dni);
 
     try {
-        const response = await fetch(`http://localhost/RNZManagementTool/php/update_event.php?id=${eventId}`, {
+        const response = await fetch(`/RNZManagementTool/updateEvent?id=${eventId}`, {
             method: "POST",
             body: JSON.stringify(eventData),
             headers: { "Content-Type": "application/json" }

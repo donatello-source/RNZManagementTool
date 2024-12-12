@@ -1,7 +1,7 @@
 // Funkcja do pobierania firm
 async function fetchFirms() {
     try {
-        const response = await fetch('http://localhost/RNZManagementTool/php/get_firms.php');
+        const response = await fetch('/RNZManagementTool/getAllFirms');
         const firms = await response.json();
         displayFirms(firms);
     } catch (error) {

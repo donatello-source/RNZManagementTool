@@ -14,7 +14,7 @@ if (employeeId) {
 
 // Funkcja do pobrania danych pracownika z API
 function fetchEmployeeData(id) {
-    fetch(`http://localhost/RNZManagementTool/php/get_employee.php?id=${id}`)
+    fetch(`/RNZManagementTool/getEmployee?id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -141,8 +141,9 @@ function enableFormEditing() {
 }
 function handleDeleteProfile() {
     if (employeeId && confirm("Czy na pewno chcesz usunąć tego pracownika?")) {
-        fetch(`http://localhost/RNZManagementTool/php/delete_employee.php?id=${employeeId}`, {
-            method: "DELETE",
+        fetch(`/RNZManagementTool/deleteEmployee?id=${employeeId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
         })
             .then(response => response.json())
             .then(data => {
@@ -177,15 +178,12 @@ const handleSaveProfile = async () => {
         stanowiska: [],
     };
 
-    // Pobieramy stawki stanowiskowe
-    if (updatedData.stanowiska.length > 0) {
-        document.querySelectorAll(".position-row input").forEach((input, index) => {
-            updatedData.stanowiska.push({
-                IdStanowiska: input.id.split('-').pop(),
-                Stawka: input.value,
-            });
+    document.querySelectorAll(".position-row input").forEach((input, index) => {
+        updatedData.stanowiska.push({
+            IdStanowiska: input.id.split('-').pop(),
+            Stawka: input.value,
         });
-    };
+    });
 
     try {
         const response = await fetch(`http://localhost/RNZManagementTool/php/update_employee.php?id=${employeeId}`, {

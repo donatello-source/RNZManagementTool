@@ -36,14 +36,13 @@ class SecurityController extends AppController
 
                 if ($result->num_rows > 0) {
                     $user = $result->fetch_assoc();
-                    if ($password == $user['Haslo'] && $user['Status'] != null) {
+                    if (password_verify($password, $user['Haslo']) && $user['Status'] != null) {
                         $_SESSION['user'] = [
                             'id' => $user['IdOsoba'],
                             'first_name' => $user['Imie'],
                             'last_name' => $user['Nazwisko'],
                             'email' => $user['Email'],
                             'status' => $user['Status']
-
                         ];
                         header('Location: /RNZManagementTool/public/views/pages/main.php');
                         exit();
