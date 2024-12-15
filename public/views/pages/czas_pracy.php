@@ -67,68 +67,7 @@ $user = $_SESSION['user'];
             </div>
         </main>
     </div>
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const container = document.getElementById('work-time-container');
-
-        // Pobierz dane wydarzeń
-        fetch('http://localhost/RNZManagementTool/php/get_user_events.php')
-            .then(response => response.json())
-            .then(events => {
-                events.forEach(event => {
-                    const eventCard = document.createElement('div');
-                    eventCard.classList.add('event-card');
-
-                    const header = `
-                    <div class="event-header">${event.NazwaWydarzenia}</div>
-                    <div class="event-details">
-                        ${event.NazwaFirmy} - ${event.Miejsce}<br>
-                        ${event.DataPoczatek} - ${event.DataKoniec}
-                    </div>
-                `;
-
-                    let workDays = '';
-                    event.DniPracy.forEach(day => {
-                        workDays += `
-                        <div class="work-day">
-                            <label>${day.Dzien}</label>
-                            <input type="checkbox" class="presence">
-                            <select disabled>
-                                <!-- Opcje stanowisk będą ładowane tutaj -->
-                            </select>
-                            <input type="number" class="overtime" value="${day.Nadgodziny || 0}" disabled>
-                        </div>
-                    `;
-                    });
-
-                    eventCard.innerHTML = header + workDays +
-                        `<button class="save-button" disabled>Zapisz</button>`;
-                    container.appendChild(eventCard);
-                });
-
-                // Dodaj obsługę przycisków
-                addEventListeners();
-            });
-    });
-
-    function addEventListeners() {
-        document.querySelectorAll('.presence').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const parent = e.target.closest('.work-day');
-                const select = parent.querySelector('select');
-                const input = parent.querySelector('.overtime');
-                select.disabled = !e.target.checked;
-                input.disabled = !e.target.checked;
-            });
-        });
-
-        document.querySelectorAll('.save-button').forEach(button => {
-            button.addEventListener('click', () => {
-                // Pobierz dane z formularza i wyślij do API
-            });
-        });
-    }
-    </script>
+    <script src="../../../js/czas_pracy.js"></script>
     <script src="../../../js/global.js"></script>
 </body>
 

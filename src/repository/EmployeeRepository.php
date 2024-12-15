@@ -199,5 +199,270 @@ class EmployeeRepository
             return false;
         }
     }
+    public function getEmployeeEvents(int $employeeId): array
+    {
+        $today = date('Y-m-d');
 
+        $query = "
+            SELECT 
+                w.IdWydarzenia, 
+                w.NazwaWydarzenia, 
+                w.DataPoczatek, 
+                w.DataKoniec, 
+                w.Miejsce, 
+                f.NazwaFirmy,
+                wp.Dzien, 
+                wp.StawkaDzienna, 
+                wp.Nadgodziny, 
+                wp.IdStanowiska
+            FROM wydarzeniapracownicy wp
+            JOIN wydarzenia w ON wp.IdWydarzenia = w.IdWydarzenia
+            JOIN firma f ON w.IdFirma = f.IdFirma
+            WHERE wp.IdOsoba = ? AND wp.Dzien <= ? AND wp.Dzien != 0 
+            ORDER BY w.DataKoniec DESC, w.DataPoczatek DESC, wp.Dzien DESC
+        ";
+
+        $stmt = $this->connection->prepare($query);
+        if (!$stmt) {
+            error_log("Błąd przygotowania zapytania: " . $this->connection->error);
+            return [];
+        }
+
+        $stmt->bind_param('is', $employeeId, $today);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            return ['message' => 'Brak wydarzeń przypisanych do pracownika'];
+        }
+
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $eventId = $row['IdWydarzenia'];
+
+            if (!isset($events[$eventId])) {
+                $events[$eventId] = [
+                    'IdWydarzenia' => $row['IdWydarzenia'],
+                    'NazwaWydarzenia' => $row['NazwaWydarzenia'],
+                    'Miejsce' => $row['Miejsce'],
+                    'NazwaFirmy' => $row['NazwaFirmy'],
+                    'DataPoczatek' => $row['DataPoczatek'],
+                    'DataKoniec' => $row['DataKoniec'],
+                    'DniPracy' => []
+                ];
+            }
+
+            $events[$eventId]['DniPracy'][] = [
+                'Dzien' => $row['Dzien'],
+                'StawkaDzienna' => $row['StawkaDzienna'],
+                'Nadgodziny' => $row['Nadgodziny'],
+                'IdStanowiska' => $row['IdStanowiska']
+            ];
+        }
+
+        $stmt->close();
+        return array_values($events);
+    }
+
+    public function getEmployeePositions(int $employeeId): array
+    {
+        $query = "
+            SELECT 
+                s.IdStanowiska, 
+                s.nazwaStanowiska, 
+                so.Stawka
+            FROM stanowiskoosoba so
+            JOIN stanowiska s ON so.IdStanowiska = s.IdStanowiska
+            WHERE so.IdOsoba = ?
+        ";
+    
+        $stmt = $this->connection->prepare($query);
+        if (!$stmt) {
+            error_log("Błąd przygotowania zapytania: " . $this->connection->error);
+            return [];
+        }
+    
+        $stmt->bind_param('i', $employeeId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows === 0) {
+            return ['message' => 'Brak przypisanych stanowisk dla pracownika'];
+        }
+    
+        $positions = [];
+        while ($row = $result->fetch_assoc()) {
+            $positions[] = [
+                'IdStanowiska' => $row['IdStanowiska'],
+                'NazwaStanowiska' => $row['nazwaStanowiska'],
+                'Stawka' => $row['Stawka']
+            ];
+        }
+    
+        $stmt->close();
+        return $positions;
+    }
+    
+    public function getEmployeesPositions(): array
+    {
+        $queryPracownicy = "
+            SELECT o.IdOsoba, o.Imie, o.Nazwisko 
+            FROM osoby o
+        ";
+        $resultPracownicy = $this->connection->query($queryPracownicy);
+        if (!$resultPracownicy) {
+            throw new Exception("Błąd podczas pobierania pracowników: " . $this->connection->error);
+        }
+        $pracownicy = $resultPracownicy->fetch_all(MYSQLI_ASSOC);
+
+        $queryStanowiska = "
+            SELECT IdStanowiska, NazwaStanowiska 
+            FROM stanowiska
+        ";
+        $resultStanowiska = $this->connection->query($queryStanowiska);
+        if (!$resultStanowiska) {
+            throw new Exception("Błąd podczas pobierania stanowisk: " . $this->connection->error);
+        }
+        $stanowiska = $resultStanowiska->fetch_all(MYSQLI_ASSOC);
+
+        $queryPowiazania = "
+            SELECT IdOsoba, IdStanowiska 
+            FROM stanowiskoosoba
+        ";
+        $resultPowiazania = $this->connection->query($queryPowiazania);
+        if (!$resultPowiazania) {
+            throw new Exception("Błąd podczas pobierania powiązań: " . $this->connection->error);
+        }
+        $powiazania = $resultPowiazania->fetch_all(MYSQLI_ASSOC);
+
+        return [
+            'pracownicy' => $pracownicy,
+            'stanowiska' => $stanowiska,
+            'powiazania' => $powiazania,
+        ];
+    }
+
+
+
+    public function updateEmployeesPositions(array $data): array
+    {
+        $response = [];
+
+        $this->connection->begin_transaction();
+
+        try {
+            if (isset($data['powiazania'])) {
+                foreach ($data['powiazania'] as $powiazanie) {
+                    $idOsoba = intval($powiazanie['IdOsoba']);
+                    $idStanowiska = intval($powiazanie['IdStanowiska']);
+
+                    $checkQuery = "
+                        SELECT * 
+                        FROM stanowiskoosoba 
+                        WHERE IdOsoba = ? AND IdStanowiska = ?
+                    ";
+                    $checkStmt = $this->connection->prepare($checkQuery);
+                    $checkStmt->bind_param('ii', $idOsoba, $idStanowiska);
+                    $checkStmt->execute();
+                    $checkResult = $checkStmt->get_result();
+
+                    if ($checkResult->num_rows === 0) {
+                        $insertQuery = "
+                            INSERT INTO stanowiskoosoba (IdOsoba, IdStanowiska) 
+                            VALUES (?, ?)
+                        ";
+                        $insertStmt = $this->connection->prepare($insertQuery);
+                        $insertStmt->bind_param('ii', $idOsoba, $idStanowiska);
+                        if ($insertStmt->execute()) {
+                            $response[] = "Dodano powiązanie: Osoba $idOsoba -> Stanowisko $idStanowiska.";
+                        } else {
+                            throw new Exception("Błąd przy dodawaniu powiązania: " . $this->connection->error);
+                        }
+                    }
+                    $checkStmt->close();
+                }
+            }
+
+            if (isset($data['usunPowiazania'])) {
+                foreach ($data['usunPowiazania'] as $powiazanie) {
+                    $idOsoba = intval($powiazanie['IdOsoba']);
+                    $idStanowiska = intval($powiazanie['IdStanowiska']);
+
+                    $deleteQuery = "
+                        DELETE FROM stanowiskoosoba 
+                        WHERE IdOsoba = ? AND IdStanowiska = ?
+                    ";
+                    $deleteStmt = $this->connection->prepare($deleteQuery);
+                    $deleteStmt->bind_param('ii', $idOsoba, $idStanowiska);
+                    if ($deleteStmt->execute()) {
+                        $response[] = "Usunięto powiązanie: Osoba $idOsoba -> Stanowisko $idStanowiska.";
+                    } else {
+                        throw new Exception("Błąd przy usuwaniu powiązania: " . $this->connection->error);
+                    }
+                    $deleteStmt->close();
+                }
+            }
+            $this->connection->commit();
+        } catch (Exception $e) {
+            $this->connection->rollback();
+            return [
+                'error' => 'Wystąpił błąd podczas aktualizacji danych: ' . $e->getMessage()
+            ];
+        }
+        return [
+            'message' => 'Dane zaktualizowane pomyślnie',
+            'details' => $response
+        ];
+    }
+    public function updateEmployee(int $employeeId, array $data): bool
+    {
+        $requiredFields = ['Imie', 'Nazwisko', 'NumerTelefonu', 'Email', 'AdresZamieszkania', 'stanowiska'];
+
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                throw new Exception("Pole $field jest wymagane");
+            }
+        }
+
+        $imie = $this->connection->real_escape_string($data['Imie']);
+        $nazwisko = $this->connection->real_escape_string($data['Nazwisko']);
+        $telefon = $this->connection->real_escape_string($data['NumerTelefonu']);
+        $email = $this->connection->real_escape_string($data['Email']);
+        $adres = $this->connection->real_escape_string($data['AdresZamieszkania']);
+        $stanowiska = $data['stanowiska'];
+
+        $checkQuery = "SELECT * FROM osoby WHERE IdOsoba = $employeeId";
+        $result = $this->connection->query($checkQuery);
+
+        if ($result->num_rows === 0) {
+            throw new Exception("Pracownik o ID $employeeId nie istnieje");
+        }
+
+        $updateQuery = "UPDATE osoby 
+                        SET Imie = '$imie', 
+                            Nazwisko = '$nazwisko', 
+                            NumerTelefonu = '$telefon', 
+                            Email = '$email', 
+                            AdresZamieszkania = '$adres' 
+                        WHERE IdOsoba = $employeeId";
+
+        if (!$this->connection->query($updateQuery)) {
+            throw new Exception("Błąd podczas aktualizacji danych osobowych: " . $this->connection->error);
+        }
+
+        foreach ($stanowiska as $stanowisko) {
+            $idStanowiska = $this->connection->real_escape_string($stanowisko['IdStanowiska']);
+            $stawka = $this->connection->real_escape_string($stanowisko['Stawka']);
+
+            $updateStanowiskoQuery = "UPDATE stanowiskoosoba 
+                                      SET Stawka = '$stawka' 
+                                      WHERE IdOsoba = $employeeId AND IdStanowiska = $idStanowiska";
+
+            if (!$this->connection->query($updateStanowiskoQuery)) {
+                throw new Exception("Błąd aktualizacji stawki stanowiska: " . $this->connection->error);
+            }
+        }
+
+        return true;
+    }
 }

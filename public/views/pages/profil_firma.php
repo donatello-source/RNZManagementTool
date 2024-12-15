@@ -60,7 +60,6 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
             </nav>
         </aside>
         <main id="firm-profile">
-
         </main>
     </div>
     <script src="../../../js/profil_firma.js"></script>

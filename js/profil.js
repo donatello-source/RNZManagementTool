@@ -186,7 +186,7 @@ const handleSaveProfile = async () => {
     });
 
     try {
-        const response = await fetch(`http://localhost/RNZManagementTool/php/update_employee.php?id=${employeeId}`, {
+        const response = await fetch(`/RNZManagementTool/updateEmployee?id=${employeeId}`, {
             method: "POST",
             body: JSON.stringify(updatedData),
             headers: {

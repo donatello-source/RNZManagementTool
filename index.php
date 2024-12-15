@@ -24,14 +24,23 @@ Router::get('getDetailedEvents', 'MainController');
 Router::get('getAllEmployees', 'MainController');
 Router::get('getAllDetailedEmployees', 'MainController');
 Router::get('getEmployee', 'MainController');
+Router::get('getEmployeeEvents', 'MainController');
+Router::get('getEmployeePositions', 'MainController');
+Router::get('getEmployeesPositions', 'MainController');
+Router::get('getEmployeePaymentsByMonth', 'MainController');
+Router::post('updateEmployeesPositions', 'MainController');
+Router::post('saveEmployeeEventDays', 'MainController');
+Router::post('updateEmployee', 'MainController');
 Router::post('addUser', 'MainController');
 Router::get('getAllFirms', 'MainController');
 Router::get('getFirm', 'MainController');
+Router::post('updateFirm', 'MainController');
 Router::get('getEvent', 'MainController');
 Router::post('updateEvent', 'MainController');
 Router::post('addEvent', 'MainController');
 Router::post('deleteEvent', 'MainController');
 Router::post('deleteEmployee', 'MainController');
+Router::post('deleteFirm', 'MainController');
 
 
 Router::run($path);

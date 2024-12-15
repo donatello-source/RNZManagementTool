@@ -60,6 +60,12 @@ button.save-button:disabled {
     cursor: not-allowed;
 }
 
+.no-events-message {
+    font-size: 16px;
+    color: #ff0000;
+    text-align: center;
+    margin: 20px 0;
+}
 
 @media (max-width: 720px) {
     .content {

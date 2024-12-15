@@ -59,7 +59,6 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
             </nav>
         </aside>
         <form id="employee-profile">
-            <!-- Tutaj będą wyświetlane dane pracownika -->
         </form>
     </div>
 

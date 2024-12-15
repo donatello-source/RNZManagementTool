@@ -111,16 +111,17 @@ function enableFormEditing() {
 }
 function handleDeleteProfile() {
     if (firmId && confirm("Czy na pewno chcesz usunąć tą firmę?")) {
-        fetch(`http://localhost/RNZManagementTool/php/delete_firm.php?id=${firmId}`, {
-            method: "DELETE",
+        fetch(`/RNZManagementTool/deleteFirm?id=${firmId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
         })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (!data.error) {
                     alert("Firma została usunięta!");
                     window.location.href = "/RNZManagementTool/public/views/pages/firmy.php";
                 } else {
-                    alert("Błąd podczas usuwania firmy: " + (data.message || 'Nieznany błąd'));
+                    alert("Błąd podczas usuwania firmy: " + (data.error || 'Nieznany błąd'));
                 }
             })
             .catch(error => console.error("Błąd:", error));
@@ -146,7 +147,7 @@ const handleSaveProfile = async () => {
     //console.log(updatedData);
 
     try {
-        const response = await fetch(`http://localhost/RNZManagementTool/php/update_firm.php?id=${firmId}`, {
+        const response = await fetch(`/RNZManagementTool/updateFirm?id=${firmId}`, {
             method: "POST",
             body: JSON.stringify(updatedData),
             headers: {

@@ -38,6 +38,59 @@ class EventRepository
 
         return $events;
     }
+    public function getDetailedEvents(): array
+    {
+        $query = "
+            SELECT w.IdWydarzenia, w.NazwaWydarzenia, w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy
+            FROM wydarzenia w
+            JOIN firma f ON w.IdFirma = f.IdFirma
+        ";
+
+        $result = $this->connection->query($query);
+        if (!$result || $result->num_rows === 0) {
+            return [];
+        }
+
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $eventId = $row['IdWydarzenia'];
+
+            $employeeQuery = "
+                SELECT DISTINCT o.Imie, o.Nazwisko, o.IdOsoba, o.kolor
+                FROM wydarzeniapracownicy wp
+                JOIN osoby o ON wp.IdOsoba = o.IdOsoba
+                WHERE wp.IdWydarzenia = ?
+            ";
+
+            $employeeStmt = $this->connection->prepare($employeeQuery);
+            $employeeStmt->bind_param('i', $eventId);
+            $employeeStmt->execute();
+            $employeeResult = $employeeStmt->get_result();
+
+            $employees = [];
+            while ($employeeRow = $employeeResult->fetch_assoc()) {
+                $employees[] = [
+                    'IdOsoba' => $employeeRow['IdOsoba'],
+                    'Imie' => $employeeRow['Imie'],
+                    'Nazwisko' => $employeeRow['Nazwisko'],
+                    'kolor' => $employeeRow['kolor']
+                ];
+            }
+
+            $events[] = [
+                'IdWydarzenia' => $row['IdWydarzenia'],
+                'NazwaWydarzenia' => $row['NazwaWydarzenia'],
+                'Miejsce' => $row['Miejsce'],
+                'NazwaFirmy' => $row['NazwaFirmy'],
+                'DataPoczatek' => $row['DataPoczatek'],
+                'DataKoniec' => $row['DataKoniec'],
+                'ListaPracownikow' => $employees,
+                'Komentarz' => $row['Komentarz']
+            ];
+        }
+
+        return $events;
+    }
     public function getEvent(int $eventId): array
     {
         $query = "
@@ -252,5 +305,89 @@ class EventRepository
             error_log("Nie udało się dodać wydarzenia: " . $e->getMessage());
             return false;
         }
+    }
+    public function saveEmployeeEventDays(int $userId, int $eventId, array $days): bool
+    {
+        $this->connection->begin_transaction();
+
+        try {
+            foreach ($days as $day) {
+                $dzien = $this->connection->real_escape_string($day['dzień']);
+                $idStanowiska = $day['idStanowiska'] ? $this->connection->real_escape_string($day['idStanowiska']) : 'NULL';
+                $stawkaDzienna = $day['obecność'];
+                $nadgodziny = $this->connection->real_escape_string($day['nadgodziny']);
+
+                $query = "
+                    INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien, IdStanowiska, StawkaDzienna, Nadgodziny)
+                    VALUES ('$eventId', '$userId', '$dzien', $idStanowiska, '$stawkaDzienna', '$nadgodziny')
+                    ON DUPLICATE KEY UPDATE 
+                        IdStanowiska = VALUES(IdStanowiska),
+                        StawkaDzienna = VALUES(StawkaDzienna),
+                        Nadgodziny = VALUES(Nadgodziny)
+                ";
+
+                if (!$this->connection->query($query)) {
+                    throw new Exception("Błąd zapisu: " . $this->connection->error);
+                }
+            }
+
+            $this->connection->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->connection->rollback();
+            throw $e;
+        }
+    }
+    public function getEmployeePaymentsByMonth(int $employeeId, int $month, int $year): array {
+        $query = "
+            SELECT 
+                e.IdWydarzenia, 
+                e.NazwaWydarzenia, 
+                wp.Dzien, 
+                wp.IdStanowiska, 
+                wp.Nadgodziny, 
+                s.StawkaGodzinowa,
+                s.NazwaStanowiska
+            FROM wydarzeniapracownicy wp
+            JOIN wydarzenia e ON wp.IdWydarzenia = e.IdWydarzenia
+            JOIN stanowiska s ON wp.IdStanowiska = s.IdStanowiska
+            WHERE wp.IdOsoba = ? 
+            AND MONTH(wp.Dzien) = ? 
+            AND YEAR(wp.Dzien) = ?
+            ORDER BY wp.Dzien ASC
+        ";
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$employeeId, $month, $year]);
+    
+        $events = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $eventId = $row['IdWydarzenia'];
+            if (!isset($events[$eventId])) {
+                $events[$eventId] = [
+                    'nazwa' => $row['NazwaWydarzenia'],
+                    'dni' => [],
+                    'suma' => 0,
+                ];
+            }
+    
+            $dzien = $row['Dzien'];
+            $stawka = $row['StawkaGodzinowa'];
+            $nadgodziny = $row['Nadgodziny'];
+            $stawkaNadgodziny = $stawka * 1.25;
+    
+            $zarobekDzien = ($stawka * 12) + ($stawkaNadgodziny * $nadgodziny);
+            $events[$eventId]['dni'][] = [
+                'dzien' => $dzien,
+                'stanowisko' => $row['NazwaStanowiska'],
+                'stawka' => $stawka,
+                'nadgodziny' => $nadgodziny,
+                'zarobek' => $zarobekDzien,
+            ];
+    
+            $events[$eventId]['suma'] += $zarobekDzien;
+        }
+    
+        return $events;
     }
 }
