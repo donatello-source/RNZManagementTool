@@ -49,6 +49,7 @@ $user = $_SESSION['user'];
                     <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
+                    <li><a href="podsumowanie.php">Podsumowanie</a></li>
                     <li><a href="ustawienia.php">Ustawienia</a></li>
                     <?php else: ?>
                     <li><a href="main.php">Home</a></li>

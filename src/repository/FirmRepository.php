@@ -128,4 +128,51 @@ class FirmRepository
 
         return true;
     }
+    public function getFirmsSummary(int $month, int $year): array
+    {
+        $query = "
+        SELECT 
+            f.NazwaFirmy,
+            w.NazwaWydarzenia,
+            SUM(
+                CASE 
+                    WHEN wp.StawkaDzienna = 1 THEN (so.Stawka * 12 + wp.Nadgodziny * so.Stawka * 1.25)
+                    ELSE 0
+                END
+            ) AS SumaPracownikow,
+            w.DodatkoweKoszta
+        FROM wydarzenia w
+        JOIN firma f ON w.IdFirma = f.IdFirma
+        LEFT JOIN wydarzeniapracownicy wp ON w.IdWydarzenia = wp.IdWydarzenia
+        LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
+        WHERE MONTH(w.DataKoniec) = ? AND YEAR(w.DataKoniec) = ?
+        GROUP BY f.NazwaFirmy, w.NazwaWydarzenia, w.DodatkoweKoszta
+        ORDER BY f.NazwaFirmy, w.NazwaWydarzenia;
+        ";
+
+        $stmt = $this->connection->prepare($query);
+        $stmt->bind_param('ii', $month, $year);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $firms = [];
+        while ($row = $result->fetch_assoc()) {
+            $firmName = $row['NazwaFirmy'];
+            if (!isset($firms[$firmName])) {
+                $firms[$firmName] = [
+                    'wydarzenia' => [],
+                    'suma' => 0
+                ];
+            }
+
+            $sumaWydarzenia = $row['SumaPracownikow'] + $row['DodatkoweKoszta'];
+            $firms[$firmName]['wydarzenia'][] = [
+                'nazwa' => $row['NazwaWydarzenia'],
+                'suma' => $sumaWydarzenia
+            ];
+            $firms[$firmName]['suma'] += $sumaWydarzenia;
+        }
+
+        return $firms;
+    }
 }

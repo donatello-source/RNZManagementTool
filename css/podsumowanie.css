@@ -1,0 +1,61 @@
+.content {
+    flex: 1;
+    background-color: #222222;
+    padding: 1em;
+    overflow-y: auto;
+}
+
+
+#filter-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.summary-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    padding-top: 0px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#summary-container h2 {
+    font-size: 1.8em;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+    font-weight: bold;
+}
+
+
+.firm-summary h3 {
+    font-size: 1.4em;
+    color: #414040;
+    margin-bottom: 10px;
+}
+
+.firm-summary div {
+    font-size: 1em;
+    color: #555;
+    margin-left: 15px;
+    padding: 5px 0;
+}
+
+.firm-summary div:hover {
+    text-decoration: underline;
+    color: #000;
+}
+
+.total-summary {
+    background-color: #a8a8a8;
+    border: 1px solid #a8a8a8;
+    border-radius: 5px;
+    font-size: 1.6em;
+    color: #000000;
+    text-align: center;
+    margin-top: 30px;
+    font-weight: bold;
+}

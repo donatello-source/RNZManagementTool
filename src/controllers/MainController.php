@@ -378,18 +378,82 @@ class MainController extends AppController
         }
     }
 
-    public function employeePayments(): void {
-        $employeeId = $_SESSION['user_id'];
+    public function getEmployeePayouts(): void {
+        session_start();
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['error' => 'Sesja nie istnieje lub brak użytkownika']);
+            exit;
+        }
+    
+        $employeeId = $_SESSION['user']['id'];
+        $month = $_GET['month'] ?? date('m');
+        $year = $_GET['year'] ?? date('Y');
+            $payouts = $this->eventRepository->getEmployeePayouts((int)$employeeId, (int)$month, (int)$year);
+            if (empty($payouts)) {
+            echo json_encode(['error' => 'Brak danych o wypłatach za wybrany miesiąc']);
+            exit;
+        }
+            echo json_encode([
+            'payouts' => $payouts,
+            'month' => $month,
+            'year' => $year,
+            'summary' => number_format(array_sum(array_column($payouts, 'suma')), 2)
+        ]);
+    }
+    public function getSummary(): void
+    {
+        session_start();
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['error' => 'Sesja nie istnieje lub brak użytkownika']);
+            exit;
+        }
+    
+        $type = $_GET['type'] ?? null;
         $month = $_GET['month'] ?? date('m');
         $year = $_GET['year'] ?? date('Y');
     
-        $payments = $this->eventRepository->getEmployeePaymentsByMonth((int)$employeeId, (int)$month, (int)$year);
+        if (!$type) {
+            echo json_encode(['error' => 'Nie podano typu podsumowania']);
+            exit;
+        }
     
-        $this->render('employeePayments', [
-            'payments' => $payments,
+        $data = [];
+        switch ($type) {
+            case 'events':
+                $data = $this->eventRepository->getEventsSummary((int)$month, (int)$year);
+                if (empty($data)) {
+                    echo json_encode(['error' => 'Brak danych o wydarzeniach za wybrany miesiąc']);
+                    exit;
+                }
+                break;
+    
+            case 'firms':
+                $data = $this->firmRepository->getFirmsSummary((int)$month, (int)$year);
+                if (empty($data)) {
+                    echo json_encode(['error' => 'Brak danych o firmach za wybrany miesiąc']);
+                    exit;
+                }
+                break;
+    
+            case 'employees':
+                $data = $this->employeeRepository->getEmployeesSummary((int)$month, (int)$year);
+                if (empty($data)) {
+                    echo json_encode(['error' => 'Brak danych o pracownikach za wybrany miesiąc']);
+                    exit;
+                }
+                break;
+    
+            default:
+                echo json_encode(['error' => 'Nieznany typ podsumowania']);
+                exit;
+        }
+    
+        echo json_encode([
+            'type' => $type,
+            'data' => $data,
             'month' => $month,
             'year' => $year,
         ]);
+        exit;
     }
-    
 }

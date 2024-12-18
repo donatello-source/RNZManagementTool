@@ -1,10 +1,8 @@
-/* Sekcja główna */
 .content {
     flex: 1;
     background-color: #222222;
     padding: 1em;
     overflow-y: auto;
-    /* Scroll tylko w sekcji głównej */
 }
 
 .events {

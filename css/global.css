@@ -55,19 +55,7 @@ header {
 }
 
 
-.profile-link a {
-    top: 5px;
-    right: 5px;
-    position: absolute;
-    color: white;
-    background-color: #555;
-    width: 10vw;
-    text-align: center;
-    border-radius: 20px;
-    font-size: 1em;
-    text-decoration: none;
 
-}
 
 .container {
     display: flex;
@@ -80,15 +68,15 @@ header {
     padding: 1em;
     display: flex;
     flex-direction: column;
-}
-
-.sidebar {
     flex: 0 0 250px;
     max-width: 250px;
     min-width: 250px;
     height: 100vh;
     overflow: hidden;
 }
+
+
+
 
 .menu-toggle {
     display: none;
@@ -97,6 +85,7 @@ header {
     font-size: 1.5em;
     color: white;
     cursor: pointer;
+    left: 20px;
 }
 
 .sidebar nav ul {
@@ -130,6 +119,7 @@ header {
 @media (max-width: 720px) {
     .sidebar {
         position: absolute;
+        width: 300px;
         left: -190px;
         top: 0;
         height: 100vh;
@@ -137,6 +127,7 @@ header {
     }
 
     .menu-toggle {
+        z-index: 999;
         margin-right: 0px;
         text-align: right;
         display: block;
@@ -144,7 +135,6 @@ header {
 
     .sidebar.active {
         left: 0px;
-
     }
 
     .container {
@@ -174,6 +164,26 @@ header {
 }
 
 .logoutBtn:hover {
+    transition: all 0.2s ease;
+    background-color: #474747;
+}
+
+.profile-link a {
+    border: none;
+    cursor: pointer;
+    background-color: #727272;
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    padding: 5px;
+    color: white;
+    text-decoration: none;
+    right: 5px;
+}
+
+.profile-link a:hover {
     transition: all 0.2s ease;
     background-color: #474747;
 }

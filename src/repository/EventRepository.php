@@ -338,30 +338,60 @@ class EventRepository
             throw $e;
         }
     }
-    public function getEmployeePaymentsByMonth(int $employeeId, int $month, int $year): array {
+    public function getEmployeePayouts(int $employeeId, int $month, int $year): array
+    {
         $query = "
-            SELECT 
-                e.IdWydarzenia, 
-                e.NazwaWydarzenia, 
-                wp.Dzien, 
-                wp.IdStanowiska, 
-                wp.Nadgodziny, 
-                s.StawkaGodzinowa,
-                s.NazwaStanowiska
+        SELECT
+            IdWydarzenia,
+            NazwaWydarzenia,
+            IdOsoba,
+            Dzien,
+            StawkaGodzinowa,
+            StawkaDzienna,
+            Nadgodziny,
+            IdStanowiska
+        FROM (
+            SELECT
+                wp.IdWydarzenia,
+                w.NazwaWydarzenia,
+                wp.IdOsoba,
+                wp.Dzien,
+                so.Stawka AS StawkaGodzinowa,
+                wp.StawkaDzienna,
+                wp.Nadgodziny,
+                wp.IdStanowiska,
+                ROW_NUMBER() OVER (
+                    PARTITION BY wp.IdWydarzenia, wp.Dzien
+                    ORDER BY so.Stawka DESC, wp.StawkaDzienna DESC, wp.Nadgodziny DESC
+                ) AS RowNum
             FROM wydarzeniapracownicy wp
-            JOIN wydarzenia e ON wp.IdWydarzenia = e.IdWydarzenia
-            JOIN stanowiska s ON wp.IdStanowiska = s.IdStanowiska
-            WHERE wp.IdOsoba = ? 
-            AND MONTH(wp.Dzien) = ? 
-            AND YEAR(wp.Dzien) = ?
-            ORDER BY wp.Dzien ASC
-        ";
+            JOIN wydarzenia w ON wp.IdWydarzenia = w.IdWydarzenia
+            LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
+            WHERE so.Stawka > 0
+            AND wp.IdOsoba = ?
+            AND MONTH(w.DataKoniec) = ?
+            AND YEAR(w.DataKoniec) = ?
+        ) AS DistinctAssignments
+        WHERE RowNum = 1
+        ORDER BY Dzien, IdWydarzenia;
+    ";
     
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$employeeId, $month, $year]);
+    
+        $stmt = $this->connection->prepare($query);
+        if (!$stmt) {
+            throw new Exception("Błąd w przygotowaniu zapytania: " . $this->connection->error);
+        }
+    
+        $stmt->bind_param("iii", $employeeId, $month, $year);
+        $stmt->execute();
+    
+        $result = $stmt->get_result();
+        if (!$result) {
+            throw new Exception("Błąd podczas wykonywania zapytania: " . $stmt->error);
+        }
     
         $events = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             $eventId = $row['IdWydarzenia'];
             if (!isset($events[$eventId])) {
                 $events[$eventId] = [
@@ -371,15 +401,14 @@ class EventRepository
                 ];
             }
     
-            $dzien = $row['Dzien'];
             $stawka = $row['StawkaGodzinowa'];
             $nadgodziny = $row['Nadgodziny'];
             $stawkaNadgodziny = $stawka * 1.25;
     
             $zarobekDzien = ($stawka * 12) + ($stawkaNadgodziny * $nadgodziny);
             $events[$eventId]['dni'][] = [
-                'dzien' => $dzien,
-                'stanowisko' => $row['NazwaStanowiska'],
+                'dzien' => $row['Dzien'],
+                'stanowisko' => $row['IdStanowiska'],
                 'stawka' => $stawka,
                 'nadgodziny' => $nadgodziny,
                 'zarobek' => $zarobekDzien,
@@ -390,4 +419,55 @@ class EventRepository
     
         return $events;
     }
+
+    public function getEventsSummary(int $month, int $year): array
+    {
+        $query = "
+        SELECT 
+            w.NazwaWydarzenia,
+            w.DataKoniec,
+            wp.IdOsoba,
+            CONCAT(o.Imie, ' ', o.Nazwisko) AS Pracownik,
+            SUM(
+                CASE 
+                    WHEN wp.StawkaDzienna = 1 THEN (so.Stawka * 12 + wp.Nadgodziny * so.Stawka * 1.25)
+                    ELSE 0
+                END
+            ) AS SumaPracownikow,
+            w.DodatkoweKoszta
+        FROM wydarzenia w
+        LEFT JOIN wydarzeniapracownicy wp ON w.IdWydarzenia = wp.IdWydarzenia
+        LEFT JOIN osoby o ON wp.IdOsoba = o.IdOsoba
+        LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
+        WHERE MONTH(w.DataKoniec) = ? AND YEAR(w.DataKoniec) = ?
+        GROUP BY w.IdWydarzenia, w.NazwaWydarzenia, w.DataKoniec, wp.IdOsoba, o.Imie, o.Nazwisko, w.DodatkoweKoszta
+        ORDER BY w.NazwaWydarzenia, wp.IdOsoba;
+        ";
+
+        $stmt = $this->connection->prepare($query);
+        $stmt->bind_param('ii', $month, $year);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $eventName = $row['NazwaWydarzenia'];
+            if (!isset($events[$eventName])) {
+                $events[$eventName] = [
+                    'data' => $row['DataKoniec'],
+                    'pracownicy' => [],
+                    'suma' => 0
+                ];
+            }
+
+            $events[$eventName]['pracownicy'][] = [
+                'pracownik' => $row['Pracownik'],
+                'suma' => $row['SumaPracownikow']
+            ];
+            $events[$eventName]['suma'] += $row['SumaPracownikow'] + $row['DodatkoweKoszta'];
+        }
+
+        return $events;
+    }
+    
 }

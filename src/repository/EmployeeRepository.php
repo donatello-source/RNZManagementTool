@@ -465,4 +465,39 @@ class EmployeeRepository
 
         return true;
     }
+    public function getEmployeesSummary(int $month, int $year): array
+    {
+        $query = "
+        SELECT 
+            CONCAT(o.Imie, ' ', o.Nazwisko) AS Pracownik,
+            SUM(
+                CASE 
+                    WHEN wp.StawkaDzienna = 1 THEN (so.Stawka * 12 + wp.Nadgodziny * so.Stawka * 1.25)
+                    ELSE 0
+                END
+            ) AS Suma
+        FROM wydarzeniapracownicy wp
+        LEFT JOIN osoby o ON wp.IdOsoba = o.IdOsoba
+        LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
+        WHERE MONTH(STR_TO_DATE(wp.Dzien, '%Y-%m-%d')) = 12 
+        AND YEAR(STR_TO_DATE(wp.Dzien, '%Y-%m-%d')) = 2024
+        GROUP BY wp.IdOsoba, o.Imie, o.Nazwisko
+        ORDER BY Suma DESC;
+        ";
+
+        $stmt = $this->connection->prepare($query);
+        $stmt->bind_param('ii', $month, $year);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $employees = [];
+        while ($row = $result->fetch_assoc()) {
+            $employees[] = [
+                'pracownik' => $row['Pracownik'],
+                'suma' => $row['Suma']
+            ];
+        }
+
+        return $employees;
+    }
 }

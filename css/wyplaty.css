@@ -1,20 +1,58 @@
-/* Sekcja główna */
 .content {
     flex: 1;
     background-color: #222222;
     padding: 1em;
     overflow-y: auto;
-    /* Scroll tylko w sekcji głównej */
 }
 
-.events {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+
+#filter-container {
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-.event-card {
-    background-color: #e3f7e0;
+.payout-card {
+    border: 1px solid #ddd;
     padding: 15px;
-    border-radius: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.payout-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.payout-days .work-day {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.total-sum {
+    background-color: #ddd;
+    border-radius: 9px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+}
+
+.no-payouts {
+    text-align: center;
+    font-size: 16px;
+    color: #888;
+}
+
+.summary-header {
+    background-color: #ddd;
+    border-radius: 9px;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
 }
