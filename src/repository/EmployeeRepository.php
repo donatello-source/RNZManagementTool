@@ -10,80 +10,75 @@ class EmployeeRepository
     }
     public function addUser(string $imie, string $nazwisko, string $email, string $haslo): bool
     {
-        $emailCheckQuery = "SELECT COUNT(*) as count FROM osoby WHERE Email = ?";
+        $emailCheckQuery = "SELECT COUNT(*) as count FROM osoby WHERE email = :email";
         $stmt = $this->connection->prepare($emailCheckQuery);
 
         if (!$stmt) {
-            error_log('Błąd podczas przygotowywania zapytania o email');
+            error_log('Błąd podczas przygotowywania zapytania email');
             return false;
         }
 
-        $stmt->bind_param("s", $email);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($result && $result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            if ($row['count'] > 0) {
-                error_log('Email już istnieje w bazie danych');
-                $stmt->close();
-                return false;
-            }
+        if ($result && $result['count'] > 0) {
+            error_log('email już istnieje w bazie danych');
+            return false;
         }
-        $stmt->close();
 
         $hashedPassword = password_hash($haslo, PASSWORD_DEFAULT);
         if (!$hashedPassword) {
             error_log('Błąd podczas haszowania hasła');
             return false;
         }
-        $insertQuery = "INSERT INTO osoby (Imie, Nazwisko, Email, Haslo, Status) VALUES (?, ?, ?, ?, 'none')";
+        $insertQuery = "INSERT INTO osoby (imie, nazwisko, email, haslo, status) VALUES (:imie, :nazwisko, :email, :haslo, 'none')";
         $stmt = $this->connection->prepare($insertQuery);
 
         if (!$stmt) {
             error_log('Błąd podczas przygotowywania zapytania o dodanie użytkownika');
             return false;
         }
-
-        $stmt->bind_param("ssss", $imie, $nazwisko, $email, $hashedPassword);
+        $stmt->bindParam(':imie', $imie, PDO::PARAM_STR);
+        $stmt->bindParam(':nazwisko', $nazwisko, PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->bindParam(':haslo', $hashedPassword, PDO::PARAM_STR);
         $success = $stmt->execute();
 
         if (!$success) {
-            error_log('Błąd podczas dodawania użytkownika: ' . $stmt->error);
+            error_log('Błąd podczas dodawania użytkownika: ' . implode(", ", $stmt->errorInfo()));
         }
-
-        $stmt->close();
         return $success;
     }
+
     public function getAllEmployees(): array
     {
         $query = "
-            SELECT IdOsoba, Imie, Nazwisko, NumerTelefonu, kolor
+            SELECT idosoba, imie, nazwisko, numertelefonu, kolor
             FROM osoby
         ";
 
         $result = $this->connection->query($query);
-        if (!$result || $result->num_rows === 0) {
+        if (!$result) {
             return [];
         }
 
-        $employees = [];
-        while ($row = $result->fetch_assoc()) {
-            $employees[] = [
-                'IdOsoba' => $row['IdOsoba'],
-                'Imie' => $row['Imie'],
-                'Nazwisko' => $row['Nazwisko'],
-                'NumerTelefonu' => $row['NumerTelefonu'],
+        $employees = $result->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(function ($row) {
+            return [
+                'idosoba' => $row['idosoba'],
+                'imie' => $row['imie'],
+                'nazwisko' => $row['nazwisko'],
+                'numertelefonu' => $row['numertelefonu'],
                 'kolor' => $row['kolor']
             ];
-        }
-
-        return $employees;
+        }, $employees);
     }
     public function getAllDetailedEmployees(): array
     {
         $query = "
-            SELECT IdOsoba, Imie, Nazwisko, NumerTelefonu, AdresZamieszkania, Email, Status, kolor
+            SELECT idosoba, imie, nazwisko, numertelefonu, adreszamieszkania, email, status, kolor
             FROM osoby
         ";
 
@@ -95,31 +90,32 @@ class EmployeeRepository
         $employees = [];
         while ($row = $result->fetch_assoc()) {
             $employees[] = [
-                'IdOsoba' => $row['IdOsoba'],
-                'Imie' => $row['Imie'],
-                'Nazwisko' => $row['Nazwisko'],
-                'NumerTelefonu' => $row['NumerTelefonu'],
-                'AdresZamieszkania' => $row['AdresZamieszkania'],
-                'Email' => $row['Email'],
-                'Status' => $row['Status'],
+                'idosoba' => $row['idosoba'],
+                'imie' => $row['imie'],
+                'nazwisko' => $row['nazwisko'],
+                'numertelefonu' => $row['numertelefonu'],
+                'adreszamieszkania' => $row['adreszamieszkania'],
+                'email' => $row['email'],
+                'status' => $row['status'],
                 'kolor' => $row['kolor']
             ];
         }
 
         return $employees;
     }
+
     public function getEmployee(int $employeeId): array
     {
         $query = "
             SELECT 
                 o.*, 
-                st.NazwaStanowiska, 
-                so.Stawka,
-                st.IdStanowiska
+                st.nazwastanowiska, 
+                so.stawka,
+                st.idstanowiska
             FROM osoby o
-            LEFT JOIN stanowiskoosoba so ON so.IdOsoba = o.IdOsoba
-            LEFT JOIN stanowiska st ON st.IdStanowiska = so.IdStanowiska
-            WHERE o.IdOsoba = ?
+            LEFT JOIN stanowiskoosoba so ON so.idosoba = o.idosoba
+            LEFT JOIN stanowiska st ON st.idstanowiska = so.idstanowiska
+            WHERE o.idosoba = :employeeId
         ";
 
         $stmt = $this->connection->prepare($query);
@@ -127,284 +123,270 @@ class EmployeeRepository
             return ['message' => 'Błąd podczas przygotowywania zapytania'];
         }
 
-        $stmt->bind_param("i", $employeeId);
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
         $stmt->execute();
 
-        $result = $stmt->get_result();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($result->num_rows === 0) {
+        if (empty($result)) {
             return ['message' => 'Pracownik nie znaleziony'];
         }
 
         $employee = [];
-
-        while ($row = $result->fetch_assoc()) {
+        foreach ($result as $row) {
             if (empty($employee)) {
                 $employee = [
-                    'Imie' => $row['Imie'],
-                    'Nazwisko' => $row['Nazwisko'],
-                    'NumerTelefonu' => $row['NumerTelefonu'],
-                    'Email' => $row['Email'],
-                    'AdresZamieszkania' => $row['AdresZamieszkania'],
-                    'Status' => $row['Status'],
+                    'imie' => $row['imie'],
+                    'nazwisko' => $row['nazwisko'],
+                    'numertelefonu' => $row['numertelefonu'],
+                    'email' => $row['email'],
+                    'adreszamieszkania' => $row['adreszamieszkania'],
+                    'status' => $row['status'],
                     'kolor' => $row['kolor'],
                     'stanowiska' => []
                 ];
             }
 
-            if ($row['NazwaStanowiska']) {
+            if ($row['nazwastanowiska']) {
                 $employee['stanowiska'][] = [
-                    'NazwaStanowiska' => $row['NazwaStanowiska'],
-                    'Stawka' => $row['Stawka'],
-                    'IdStanowiska' => $row['IdStanowiska']
+                    'nazwastanowiska' => $row['nazwastanowiska'],
+                    'stawka' => $row['stawka'],
+                    'idstanowiska' => $row['idstanowiska']
                 ];
             }
         }
-
-        $stmt->close();
 
         return $employee;
     }
 
+
     public function deleteEmployee(int $employeeId): bool
     {
-        $this->connection->begin_transaction();
+        $this->connection->beginTransaction();
 
         try {
-            $stmt = $this->connection->prepare("DELETE FROM stanowiskoosoba WHERE IdOsoba = ?");
+            $stmt = $this->connection->prepare("DELETE FROM stanowiskoosoba WHERE idosoba = :employeeId");
             if (!$stmt) {
-                throw new Exception("Błąd podczas przygotowywania zapytania: " . $this->connection->error);
+                throw new Exception("Błąd podczas przygotowywania zapytania: " . implode(", ", $this->connection->errorInfo()));
             }
-            $stmt->bind_param('i', $employeeId);
+            $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
             if (!$stmt->execute()) {
-                throw new Exception("Błąd usuwania stanowisk: " . $stmt->error);
+                throw new Exception("Błąd usuwania stanowisk: " . implode(", ", $stmt->errorInfo()));
             }
-            $stmt->close();
 
-            $stmt = $this->connection->prepare("DELETE FROM osoby WHERE IdOsoba = ?");
+            $stmt = $this->connection->prepare("DELETE FROM osoby WHERE idosoba = :employeeId");
             if (!$stmt) {
-                throw new Exception("Błąd podczas przygotowywania zapytania: " . $this->connection->error);
+                throw new Exception("Błąd podczas przygotowywania zapytania: " . implode(", ", $this->connection->errorInfo()));
             }
-            $stmt->bind_param('i', $employeeId);
+            $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
             if (!$stmt->execute()) {
-                throw new Exception("Błąd usuwania pracownika: " . $stmt->error);
+                throw new Exception("Błąd usuwania pracownika: " . implode(", ", $stmt->errorInfo()));
             }
-            $stmt->close();
 
             $this->connection->commit();
             return true;
         } catch (Exception $e) {
-            $this->connection->rollback();
+            $this->connection->rollBack();
             error_log("Nie udało się usunąć pracownika: " . $e->getMessage());
             return false;
         }
     }
+
     public function getEmployeeEvents(int $employeeId): array
     {
         $today = date('Y-m-d');
-
+    
         $query = "
             SELECT 
-                w.IdWydarzenia, 
-                w.NazwaWydarzenia, 
-                w.DataPoczatek, 
-                w.DataKoniec, 
-                w.Miejsce, 
-                f.NazwaFirmy,
-                wp.Dzien, 
-                wp.StawkaDzienna, 
-                wp.Nadgodziny, 
-                wp.IdStanowiska
+                w.idwydarzenia, 
+                w.nazwawydarzenia, 
+                w.datapoczatek, 
+                w.datakoniec, 
+                w.miejsce, 
+                f.nazwafirmy,
+                wp.dzien, 
+                wp.stawkadzienna, 
+                wp.nadgodziny, 
+                wp.idstanowiska
             FROM wydarzeniapracownicy wp
-            JOIN wydarzenia w ON wp.IdWydarzenia = w.IdWydarzenia
-            JOIN firma f ON w.IdFirma = f.IdFirma
-            WHERE wp.IdOsoba = ? AND wp.Dzien <= ? AND wp.Dzien != 0 
-            ORDER BY w.DataKoniec DESC, w.DataPoczatek DESC, wp.Dzien DESC
+            JOIN wydarzenia w ON wp.idwydarzenia = w.idwydarzenia
+            JOIN firma f ON w.idfirma = f.idfirma
+            WHERE wp.idosoba = :employeeId 
+              AND wp.dzien <= :today 
+              AND wp.dzien != '0'
+            ORDER BY w.datakoniec DESC, w.datapoczatek DESC, wp.dzien DESC
         ";
-
+    
         $stmt = $this->connection->prepare($query);
         if (!$stmt) {
-            error_log("Błąd przygotowania zapytania: " . $this->connection->error);
+            error_log("Błąd przygotowania zapytania: " . implode(" ", $this->connection->errorInfo()));
             return [];
         }
-
-        $stmt->bind_param('is', $employeeId, $today);
+    
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
+        $stmt->bindParam(':today', $today, PDO::PARAM_STR);
         $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows === 0) {
-            return ['message' => 'Brak wydarzeń przypisanych do pracownika'];
-        }
-
+    
         $events = [];
-        while ($row = $result->fetch_assoc()) {
-            $eventId = $row['IdWydarzenia'];
-
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $eventId = $row['idwydarzenia'];
+    
             if (!isset($events[$eventId])) {
                 $events[$eventId] = [
-                    'IdWydarzenia' => $row['IdWydarzenia'],
-                    'NazwaWydarzenia' => $row['NazwaWydarzenia'],
-                    'Miejsce' => $row['Miejsce'],
-                    'NazwaFirmy' => $row['NazwaFirmy'],
-                    'DataPoczatek' => $row['DataPoczatek'],
-                    'DataKoniec' => $row['DataKoniec'],
-                    'DniPracy' => []
+                    'idwydarzenia' => $row['idwydarzenia'],
+                    'nazwawydarzenia' => $row['nazwawydarzenia'],
+                    'miejsce' => $row['miejsce'],
+                    'nazwafirmy' => $row['nazwafirmy'],
+                    'datapoczatek' => $row['datapoczatek'],
+                    'datakoniec' => $row['datakoniec'],
+                    'dnipracy' => []
                 ];
             }
-
-            $events[$eventId]['DniPracy'][] = [
-                'Dzien' => $row['Dzien'],
-                'StawkaDzienna' => $row['StawkaDzienna'],
-                'Nadgodziny' => $row['Nadgodziny'],
-                'IdStanowiska' => $row['IdStanowiska']
+    
+            $events[$eventId]['dnipracy'][] = [
+                'dzien' => $row['dzien'],
+                'stawkadzienna' => $row['stawkadzienna'],
+                'nadgodziny' => $row['nadgodziny'],
+                'idstanowiska' => $row['idstanowiska']
             ];
         }
-
-        $stmt->close();
+    
         return array_values($events);
     }
+    
+    
 
     public function getEmployeePositions(int $employeeId): array
     {
         $query = "
             SELECT 
-                s.IdStanowiska, 
-                s.nazwaStanowiska, 
-                so.Stawka
+                s.idstanowiska, 
+                s.nazwastanowiska, 
+                so.stawka
             FROM stanowiskoosoba so
-            JOIN stanowiska s ON so.IdStanowiska = s.IdStanowiska
-            WHERE so.IdOsoba = ?
+            JOIN stanowiska s ON so.idstanowiska = s.idstanowiska
+            WHERE so.idosoba = :employeeId
         ";
     
         $stmt = $this->connection->prepare($query);
         if (!$stmt) {
-            error_log("Błąd przygotowania zapytania: " . $this->connection->error);
+            error_log("Błąd przygotowania zapytania: " . implode(" ", $this->connection->errorInfo()));
             return [];
         }
     
-        $stmt->bind_param('i', $employeeId);
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->get_result();
     
-        if ($result->num_rows === 0) {
+        $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        if (empty($positions)) {
             return ['message' => 'Brak przypisanych stanowisk dla pracownika'];
         }
     
-        $positions = [];
-        while ($row = $result->fetch_assoc()) {
-            $positions[] = [
-                'IdStanowiska' => $row['IdStanowiska'],
-                'NazwaStanowiska' => $row['nazwaStanowiska'],
-                'Stawka' => $row['Stawka']
-            ];
-        }
-    
-        $stmt->close();
         return $positions;
     }
+    
     
     public function getEmployeesPositions(): array
     {
         $queryPracownicy = "
-            SELECT o.IdOsoba, o.Imie, o.Nazwisko 
+            SELECT o.idosoba, o.imie, o.nazwisko 
             FROM osoby o
         ";
         $resultPracownicy = $this->connection->query($queryPracownicy);
         if (!$resultPracownicy) {
             throw new Exception("Błąd podczas pobierania pracowników: " . $this->connection->error);
         }
-        $pracownicy = $resultPracownicy->fetch_all(MYSQLI_ASSOC);
-
+        $pracownicy = $resultPracownicy->fetchAll(PDO::FETCH_ASSOC);
+    
         $queryStanowiska = "
-            SELECT IdStanowiska, NazwaStanowiska 
+            SELECT idstanowiska, nazwastanowiska 
             FROM stanowiska
         ";
         $resultStanowiska = $this->connection->query($queryStanowiska);
         if (!$resultStanowiska) {
             throw new Exception("Błąd podczas pobierania stanowisk: " . $this->connection->error);
         }
-        $stanowiska = $resultStanowiska->fetch_all(MYSQLI_ASSOC);
-
+        $stanowiska = $resultStanowiska->fetchAll(PDO::FETCH_ASSOC);
+    
         $queryPowiazania = "
-            SELECT IdOsoba, IdStanowiska 
+            SELECT idosoba, idstanowiska 
             FROM stanowiskoosoba
         ";
         $resultPowiazania = $this->connection->query($queryPowiazania);
         if (!$resultPowiazania) {
             throw new Exception("Błąd podczas pobierania powiązań: " . $this->connection->error);
         }
-        $powiazania = $resultPowiazania->fetch_all(MYSQLI_ASSOC);
-
+        $powiazania = $resultPowiazania->fetchAll(PDO::FETCH_ASSOC);
+    
         return [
             'pracownicy' => $pracownicy,
             'stanowiska' => $stanowiska,
             'powiazania' => $powiazania,
         ];
     }
-
-
-
+    
     public function updateEmployeesPositions(array $data): array
     {
         $response = [];
-
-        $this->connection->begin_transaction();
-
+    
+        $this->connection->beginTransaction();
+    
         try {
             if (isset($data['powiazania'])) {
                 foreach ($data['powiazania'] as $powiazanie) {
-                    $idOsoba = intval($powiazanie['IdOsoba']);
-                    $idStanowiska = intval($powiazanie['IdStanowiska']);
-
+                    $idosoba = intval($powiazanie['idosoba']);
+                    $idstanowiska = intval($powiazanie['idstanowiska']);
+    
                     $checkQuery = "
-                        SELECT * 
+                        SELECT 1 
                         FROM stanowiskoosoba 
-                        WHERE IdOsoba = ? AND IdStanowiska = ?
+                        WHERE idosoba = :idosoba AND idstanowiska = :idstanowiska
                     ";
                     $checkStmt = $this->connection->prepare($checkQuery);
-                    $checkStmt->bind_param('ii', $idOsoba, $idStanowiska);
+                    $checkStmt->bindParam(':idosoba', $idosoba, PDO::PARAM_INT);
+                    $checkStmt->bindParam(':idstanowiska', $idstanowiska, PDO::PARAM_INT);
                     $checkStmt->execute();
-                    $checkResult = $checkStmt->get_result();
-
-                    if ($checkResult->num_rows === 0) {
+    
+                    if ($checkStmt->rowCount() === 0) {
                         $insertQuery = "
-                            INSERT INTO stanowiskoosoba (IdOsoba, IdStanowiska) 
-                            VALUES (?, ?)
+                            INSERT INTO stanowiskoosoba (idosoba, idstanowiska) 
+                            VALUES (:idosoba, :idstanowiska)
                         ";
                         $insertStmt = $this->connection->prepare($insertQuery);
-                        $insertStmt->bind_param('ii', $idOsoba, $idStanowiska);
+                        $insertStmt->bindParam(':idosoba', $idosoba, PDO::PARAM_INT);
+                        $insertStmt->bindParam(':idstanowiska', $idstanowiska, PDO::PARAM_INT);
                         if ($insertStmt->execute()) {
-                            $response[] = "Dodano powiązanie: Osoba $idOsoba -> Stanowisko $idStanowiska.";
+                            $response[] = "Dodano powiązanie: Osoba $idosoba -> Stanowisko $idstanowiska.";
                         } else {
-                            throw new Exception("Błąd przy dodawaniu powiązania: " . $this->connection->error);
+                            throw new Exception("Błąd przy dodawaniu powiązania: " . implode(" ", $this->connection->errorInfo()));
                         }
                     }
-                    $checkStmt->close();
                 }
             }
-
+    
             if (isset($data['usunPowiazania'])) {
                 foreach ($data['usunPowiazania'] as $powiazanie) {
-                    $idOsoba = intval($powiazanie['IdOsoba']);
-                    $idStanowiska = intval($powiazanie['IdStanowiska']);
-
+                    $idosoba = intval($powiazanie['idosoba']);
+                    $idstanowiska = intval($powiazanie['idstanowiska']);
+    
                     $deleteQuery = "
                         DELETE FROM stanowiskoosoba 
-                        WHERE IdOsoba = ? AND IdStanowiska = ?
+                        WHERE idosoba = :idosoba AND idstanowiska = :idstanowiska
                     ";
                     $deleteStmt = $this->connection->prepare($deleteQuery);
-                    $deleteStmt->bind_param('ii', $idOsoba, $idStanowiska);
+                    $deleteStmt->bindParam(':idosoba', $idosoba, PDO::PARAM_INT);
+                    $deleteStmt->bindParam(':idstanowiska', $idstanowiska, PDO::PARAM_INT);
                     if ($deleteStmt->execute()) {
-                        $response[] = "Usunięto powiązanie: Osoba $idOsoba -> Stanowisko $idStanowiska.";
+                        $response[] = "Usunięto powiązanie: Osoba $idosoba -> Stanowisko $idstanowiska.";
                     } else {
-                        throw new Exception("Błąd przy usuwaniu powiązania: " . $this->connection->error);
+                        throw new Exception("Błąd przy usuwaniu powiązania: " . implode(" ", $this->connection->errorInfo()));
                     }
-                    $deleteStmt->close();
                 }
             }
             $this->connection->commit();
         } catch (Exception $e) {
-            $this->connection->rollback();
+            $this->connection->rollBack();
             return [
                 'error' => 'Wystąpił błąd podczas aktualizacji danych: ' . $e->getMessage()
             ];
@@ -414,9 +396,13 @@ class EmployeeRepository
             'details' => $response
         ];
     }
+    
+
+    
+
     public function updateEmployee(int $employeeId, array $data): bool
     {
-        $requiredFields = ['Imie', 'Nazwisko', 'NumerTelefonu', 'Email', 'AdresZamieszkania', 'stanowiska'];
+        $requiredFields = ['imie', 'nazwisko', 'numertelefonu', 'email', 'adreszamieszkania', 'stanowiska'];
 
         foreach ($requiredFields as $field) {
             if (!isset($data[$field])) {
@@ -424,80 +410,115 @@ class EmployeeRepository
             }
         }
 
-        $imie = $this->connection->real_escape_string($data['Imie']);
-        $nazwisko = $this->connection->real_escape_string($data['Nazwisko']);
-        $telefon = $this->connection->real_escape_string($data['NumerTelefonu']);
-        $email = $this->connection->real_escape_string($data['Email']);
-        $adres = $this->connection->real_escape_string($data['AdresZamieszkania']);
+        $imie = $data['imie'];
+        $nazwisko = $data['nazwisko'];
+        $telefon = $data['numertelefonu'];
+        $email = $data['email'];
+        $adres = $data['adreszamieszkania'];
         $stanowiska = $data['stanowiska'];
 
-        $checkQuery = "SELECT * FROM osoby WHERE IdOsoba = $employeeId";
-        $result = $this->connection->query($checkQuery);
+        $checkQuery = "SELECT * FROM osoby WHERE idosoba = :employeeId";
+        $stmt = $this->connection->prepare($checkQuery);
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
+        $stmt->execute();
 
-        if ($result->num_rows === 0) {
+        if ($stmt->rowCount() === 0) {
             throw new Exception("Pracownik o ID $employeeId nie istnieje");
         }
 
-        $updateQuery = "UPDATE osoby 
-                        SET Imie = '$imie', 
-                            Nazwisko = '$nazwisko', 
-                            NumerTelefonu = '$telefon', 
-                            Email = '$email', 
-                            AdresZamieszkania = '$adres' 
-                        WHERE IdOsoba = $employeeId";
+        $updateQuery = "
+            UPDATE osoby 
+            SET 
+                imie = :imie, 
+                nazwisko = :nazwisko, 
+                numertelefonu = :telefon, 
+                email = :email, 
+                adreszamieszkania = :adres 
+            WHERE idosoba = :employeeId
+        ";
+        $stmt = $this->connection->prepare($updateQuery);
+        $stmt->bindParam(':imie', $imie, PDO::PARAM_STR);
+        $stmt->bindParam(':nazwisko', $nazwisko, PDO::PARAM_STR);
+        $stmt->bindParam(':telefon', $telefon, PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->bindParam(':adres', $adres, PDO::PARAM_STR);
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
 
-        if (!$this->connection->query($updateQuery)) {
-            throw new Exception("Błąd podczas aktualizacji danych osobowych: " . $this->connection->error);
+        if (!$stmt->execute()) {
+            throw new Exception("Błąd podczas aktualizacji danych osobowych: " . implode(", ", $stmt->errorInfo()));
         }
 
         foreach ($stanowiska as $stanowisko) {
-            $idStanowiska = $this->connection->real_escape_string($stanowisko['IdStanowiska']);
-            $stawka = $this->connection->real_escape_string($stanowisko['Stawka']);
+            $idstanowiska = $stanowisko['idstanowiska'];
+            $stawka = $stanowisko['stawka'];
 
-            $updateStanowiskoQuery = "UPDATE stanowiskoosoba 
-                                      SET Stawka = '$stawka' 
-                                      WHERE IdOsoba = $employeeId AND IdStanowiska = $idStanowiska";
+            $updateStanowiskoQuery = "
+                UPDATE stanowiskoosoba 
+                SET stawka = :stawka 
+                WHERE idosoba = :employeeId AND idstanowiska = :idstanowiska
+            ";
+            $stmt = $this->connection->prepare($updateStanowiskoQuery);
+            $stmt->bindParam(':stawka', $stawka, PDO::PARAM_STR);
+            $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
+            $stmt->bindParam(':idstanowiska', $idstanowiska, PDO::PARAM_INT);
 
-            if (!$this->connection->query($updateStanowiskoQuery)) {
-                throw new Exception("Błąd aktualizacji stawki stanowiska: " . $this->connection->error);
+            if (!$stmt->execute()) {
+                throw new Exception("Błąd aktualizacji stawki stanowiska: " . implode(", ", $stmt->errorInfo()));
             }
         }
 
         return true;
     }
+
+
+    
     public function getEmployeesSummary(int $month, int $year): array
     {
         $query = "
         SELECT 
-            CONCAT(o.Imie, ' ', o.Nazwisko) AS Pracownik,
+            CONCAT(o.imie, ' ', o.nazwisko) AS pracownik,
             SUM(
                 CASE 
-                    WHEN wp.StawkaDzienna = 1 THEN (so.Stawka * 12 + wp.Nadgodziny * so.Stawka * 1.25)
+                    WHEN wp.stawkadzienna = true THEN (so.stawka * 12 + wp.nadgodziny * so.stawka * 1.25)
                     ELSE 0
                 END
-            ) AS Suma
+            ) AS suma
         FROM wydarzeniapracownicy wp
-        LEFT JOIN osoby o ON wp.IdOsoba = o.IdOsoba
-        LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
-        WHERE MONTH(STR_TO_DATE(wp.Dzien, '%Y-%m-%d')) = 12 
-        AND YEAR(STR_TO_DATE(wp.Dzien, '%Y-%m-%d')) = 2024
-        GROUP BY wp.IdOsoba, o.Imie, o.Nazwisko
-        ORDER BY Suma DESC;
+        LEFT JOIN osoby o ON wp.idosoba = o.idosoba
+        LEFT JOIN stanowiskoosoba so ON so.idstanowiska = wp.idstanowiska AND so.idosoba = wp.idosoba
+        WHERE EXTRACT(MONTH FROM TO_DATE(wp.dzien, 'YYYY-MM-DD')) = :month 
+        AND EXTRACT(YEAR FROM TO_DATE(wp.dzien, 'YYYY-MM-DD')) = :year
+        GROUP BY wp.idosoba, o.imie, o.nazwisko
+        ORDER BY suma DESC;
         ";
-
+    
         $stmt = $this->connection->prepare($query);
-        $stmt->bind_param('ii', $month, $year);
+        if (!$stmt) {
+            throw new Exception("Błąd w przygotowaniu zapytania: " . implode(", ", $this->connection->errorInfo()));
+        }
+    
+        $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+        $stmt->bindParam(':year', $year, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->get_result();
-
+    
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($result === false) {
+            throw new Exception("Błąd podczas wykonywania zapytania: " . implode(", ", $stmt->errorInfo()));
+        }
+    
+        if (empty($result)) {
+            return [];
+        }
+    
         $employees = [];
-        while ($row = $result->fetch_assoc()) {
+        foreach ($result as $row) {
             $employees[] = [
-                'pracownik' => $row['Pracownik'],
-                'suma' => $row['Suma']
+                'pracownik' => $row['pracownik'],
+                'suma' => $row['suma']
             ];
         }
-
+    
         return $employees;
     }
+    
 }

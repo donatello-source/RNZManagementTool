@@ -36,7 +36,7 @@ if (firmId) {
 }
 
 function fetchFirmData(id) {
-    fetch(`/RNZManagementTool/getFirm?id=${id}`)
+    fetch(`/getFirm?id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -59,19 +59,19 @@ function displayFirmProfile(firm) {
 <div class="firm-card">
     <div class="firm-name">
         <label for="firm-name">Nazwa Firmy:</label>
-        <input type="text" id="firm-name" value="${firm.NazwaFirmy}" readonly>
+        <input type="text" id="firm-name" value="${firm.nazwafirmy}" readonly>
     </div>
     <div class="firm-phone">
         <label for="firm-phone">Numer telefonu:</label>
-        <input type="text" id="firm-phone" value="${firm.Telefon}" readonly>
+        <input type="text" id="firm-phone" value="${firm.telefon}" readonly>
     </div>
     <div class="firm-address">
         <label for="firm-address">Adres:</label>
-        <input type="text" id="firm-address" value="${firm.AdresFirmy}" readonly>
+        <input type="text" id="firm-address" value="${firm.adresfirmy}" readonly>
     </div>
-    <div class="firm-NIP">
-        <label for="firm-NIP">NIP:</label>
-        <input type="text" id="firm-NIP" value="${firm.NIP}" readonly>
+    <div class="firm-nip">
+        <label for="firm-nip">NIP:</label>
+        <input type="text" id="firm-nip" value="${firm.nip}" readonly>
     </div>
     <div class="firm-color">
         <label for="firm-color">Kolor:</label>
@@ -111,7 +111,7 @@ function enableFormEditing() {
 }
 function handleDeleteProfile() {
     if (firmId && confirm("Czy na pewno chcesz usunąć tą firmę?")) {
-        fetch(`/RNZManagementTool/deleteFirm?id=${firmId}`, {
+        fetch(`/deleteFirm?id=${firmId}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" }
         })
@@ -119,7 +119,7 @@ function handleDeleteProfile() {
             .then(data => {
                 if (!data.error) {
                     alert("Firma została usunięta!");
-                    window.location.href = "/RNZManagementTool/public/views/pages/firmy.php";
+                    window.location.href = "/public/views/pages/firmy.php";
                 } else {
                     alert("Błąd podczas usuwania firmy: " + (data.error || 'Nieznany błąd'));
                 }
@@ -138,16 +138,16 @@ const handleEditProfile = () => {
 };
 const handleSaveProfile = async () => {
     const updatedData = {
-        NazwaFirmy: document.getElementById("firm-name").value,
-        Telefon: document.getElementById("firm-phone").value,
-        AdresFirmy: document.getElementById("firm-address").value,
-        NIP: document.getElementById("firm-NIP").value,
+        nazwafirmy: document.getElementById("firm-name").value,
+        telefon: document.getElementById("firm-phone").value,
+        adresfirmy: document.getElementById("firm-address").value,
+        nip: document.getElementById("firm-nip").value,
         kolor: document.getElementById("firm-color").value
     };
-    //console.log(updatedData);
+    console.log(updatedData);
 
     try {
-        const response = await fetch(`/RNZManagementTool/updateFirm?id=${firmId}`, {
+        const response = await fetch(`/updateFirm?id=${firmId}`, {
             method: "POST",
             body: JSON.stringify(updatedData),
             headers: {
@@ -160,6 +160,6 @@ const handleSaveProfile = async () => {
         window.location.reload();
 
     } catch (error) {
-        console.error("Błąd podczas aktualizacji pracownika:", error);
+        console.error("Błąd podczas aktualizacji firmy:", error);
     }
 };

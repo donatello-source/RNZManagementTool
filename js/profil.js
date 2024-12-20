@@ -67,36 +67,36 @@ function displayEmployeeProfile(employee) {
     <div class="employee-card">
         <div class="profil-name">
             <label for="employee-name">Imię i nazwisko:</label>
-            <input type="text" id="employee-name" value="${employee.Imie} ${employee.Nazwisko}" readonly>
+            <input type="text" id="employee-name" value="${employee.imie} ${employee.nazwisko}" readonly>
         </div>
         <div class="profil-phone">
             <label for="employee-phone">Numer telefonu:</label>
-            <input type="text" id="employee-phone" value="${employee.NumerTelefonu}" readonly>
+            <input type="text" id="employee-phone" value="${employee.numertelefonu}" readonly>
         </div>
         <div class="profil-mail">
             <label for="employee-mail">Email:</label>
-            <input type="email" id="employee-mail" value="${employee.Email}" readonly>
+            <input type="email" id="employee-mail" value="${employee.email}" readonly>
         </div>
         <div class="profil-addres">
             <label for="employee-address">Adres zamieszkania:</label>
-            <input type="text" id="employee-address" value="${employee.AdresZamieszkania}" readonly>
+            <input type="text" id="employee-address" value="${employee.adreszamieszkania}" readonly>
         </div>
         <div class="profil-state">
             <label for="employee-position">Status:</label>
-            <input type="text" id="employee-position" value="${employee.Status}" readonly>
+            <input type="text" id="employee-position" value="${employee.status}" readonly>
         </div>
     `;
 
         if (employee.stanowiska.length > 0) {
             profileHTML += `<div class="profil-position">`;
             employee.stanowiska.forEach((stanowisko) => {
-                if (stanowisko.Stawka == null) {
-                    stanowisko.Stawka = 0;
+                if (stanowisko.stawka == null) {
+                    stanowisko.stawka = 0;
                 }
                 profileHTML += `
                 <div class="position-row">
-                    <label for="position-salary-${stanowisko.IdStanowiska}">${stanowisko.NazwaStanowiska} stawka:</label>
-                    <input type="text" id="position-salary-${stanowisko.IdStanowiska}" value="${stanowisko.Stawka}" readonly>
+                    <label for="position-salary-${stanowisko.idstanowiska}">${stanowisko.nazwastanowiska} stawka:</label>
+                    <input type="text" id="position-salary-${stanowisko.idstanowiska}" value="${stanowisko.stawka}" readonly>
                 </div>
             `;
             });
@@ -149,7 +149,7 @@ function handleDeleteProfile() {
             .then(data => {
                 if (data.success) {
                     alert("Pracownik został usunięty!");
-                    window.location.href = "/RNZManagementTool/public/views/pages/pracownicy.php";
+                    window.location.href = "/public/views/pages/pracownicy.php";
                 } else {
                     alert("Błąd podczas usuwania pracownika: " + (data.message || 'Nieznany błąd'));
                 }
@@ -169,24 +169,24 @@ const handleEditProfile = () => {
 const handleSaveProfile = async () => {
     const employeeId = getQueryParam('id');
     const updatedData = {
-        Imie: document.getElementById("employee-name").value.split(" ")[0],
-        Nazwisko: document.getElementById("employee-name").value.split(" ")[1],
-        NumerTelefonu: document.getElementById("employee-phone").value,
-        Email: document.getElementById("employee-mail").value,
-        AdresZamieszkania: document.getElementById("employee-address").value,
-        Status: document.getElementById("employee-position").value,
+        imie: document.getElementById("employee-name").value.split(" ")[0],
+        nazwisko: document.getElementById("employee-name").value.split(" ")[1],
+        numertelefonu: document.getElementById("employee-phone").value,
+        email: document.getElementById("employee-mail").value,
+        adreszamieszkania: document.getElementById("employee-address").value,
+        status: document.getElementById("employee-position").value,
         stanowiska: [],
     };
 
     document.querySelectorAll(".position-row input").forEach((input, index) => {
         updatedData.stanowiska.push({
-            IdStanowiska: input.id.split('-').pop(),
-            Stawka: input.value,
+            idstanowiska: input.id.split('-').pop(),
+            stawka: input.value,
         });
     });
 
     try {
-        const response = await fetch(`/RNZManagementTool/updateEmployee?id=${employeeId}`, {
+        const response = await fetch(`/updateEmployee?id=${employeeId}`, {
             method: "POST",
             body: JSON.stringify(updatedData),
             headers: {

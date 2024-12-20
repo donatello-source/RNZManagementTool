@@ -21,10 +21,10 @@ class EventManager {
 
     async fetchFirms() {
         try {
-            const response = await fetch("/RNZManagementTool/getAllFirms");
+            const response = await fetch("/getAllFirms");
             const companies = await response.json();
             const dataList = document.getElementById('companies-datalist');
-            dataList.innerHTML = companies.map(company => `<option value="${company.NazwaFirmy}">`).join('');
+            dataList.innerHTML = companies.map(company => `<option value="${company.nazwafirmy}">`).join('');
         } catch (error) {
             console.error('Error fetching firms:', error);
         }
@@ -32,10 +32,10 @@ class EventManager {
 
     async fetchEmployees() {
         try {
-            const response = await fetch('/RNZManagementTool/getAllEmployees');
+            const response = await fetch('/getAllEmployees');
             const employees = await response.json();
             const dataList = document.getElementById('employees-datalist');
-            dataList.innerHTML = employees.map(employee => `<option value="${employee.Imie} ${employee.Nazwisko}">`).join('');
+            dataList.innerHTML = employees.map(employee => `<option value="${employee.imie} ${employee.nazwisko}">`).join('');
         } catch (error) {
             console.error("Error fetching employees:", error);
         }
@@ -43,7 +43,7 @@ class EventManager {
 
     async fetchEvents() {
         try {
-            const response = await fetch('/RNZManagementTool/getDetailedEvents');
+            const response = await fetch('/getDetailedEvents');
             this.allEvents = await response.json();
             this.displayEvents(this.allEvents);
         } catch (error) {
@@ -125,16 +125,16 @@ class EventManager {
 
     filterAndDisplayEvents() {
         const filteredEvents = this.allEvents.filter(event => {
-            const matchesPlace = !this.activeFilters.places.length || this.activeFilters.places.includes(event.Miejsce);
-            const matchesCompany = !this.activeFilters.companies.length || this.activeFilters.companies.includes(event.NazwaFirmy);
+            const matchesPlace = !this.activeFilters.places.length || this.activeFilters.places.includes(event.miejsce);
+            const matchesCompany = !this.activeFilters.companies.length || this.activeFilters.companies.includes(event.nazwafirmy);
 
-            const eventStart = new Date(event.DataPoczatek);
-            const eventEnd = new Date(event.DataKoniec);
+            const eventStart = new Date(event.datapoczatek);
+            const eventEnd = new Date(event.datakoniec);
             const filterStart = this.activeFilters.dateStart ? new Date(this.activeFilters.dateStart) : null;
             const filterEnd = this.activeFilters.dateEnd ? new Date(this.activeFilters.dateEnd) : null;
             const matchesDate = (!filterStart || eventEnd >= filterStart) && (!filterEnd || eventStart <= filterEnd);
 
-            const employeeIds = event.ListaPracownikow.map(e => e.Imie + ' ' + e.Nazwisko);
+            const employeeIds = event.listapracownikow.map(e => e.imie + ' ' + e.nazwisko);
             const matchesEmployees = this.activeFilters.employeeMode === 'all'
                 ? this.activeFilters.employees.every(emp => employeeIds.includes(emp))
                 : this.activeFilters.employees.some(emp => employeeIds.includes(emp));
@@ -149,48 +149,49 @@ class EventManager {
         const searchQuery = query.toLowerCase();
         const filteredEvents = this.allEvents.filter(event => {
             return (
-                event.NazwaWydarzenia.toLowerCase().includes(searchQuery) ||
-                event.Miejsce.toLowerCase().includes(searchQuery) ||
-                event.NazwaFirmy.toLowerCase().includes(searchQuery) ||
-                event.Komentarz?.toLowerCase().includes(searchQuery) ||
-                event.ListaPracownikow.some(employee =>
-                    `${employee.Imie} ${employee.Nazwisko}`.toLowerCase().includes(searchQuery)
+                event.nazwawydarzenia.toLowerCase().includes(searchQuery) ||
+                event.miejsce.toLowerCase().includes(searchQuery) ||
+                event.nazwafirmy.toLowerCase().includes(searchQuery) ||
+                event.komentarz?.toLowerCase().includes(searchQuery) ||
+                event.listapracownikow.some(employee =>
+                    `${employee.imie} ${employee.nazwisko}`.toLowerCase().includes(searchQuery)
                 ) ||
-                event.DataPoczatek.includes(searchQuery) ||
-                event.DataKoniec.includes(searchQuery)
+                event.datapoczatek.includes(searchQuery) ||
+                event.datakoniec.includes(searchQuery)
             );
         });
         this.displayEvents(filteredEvents);
     }
 
     displayEvents(events) {
+        console.log(events);
         const eventsContainer = document.getElementById('events-container');
         eventsContainer.innerHTML = '';
 
         events.forEach(event => {
-            const employeesHtml = event.ListaPracownikow && Array.isArray(event.ListaPracownikow)
-                ? event.ListaPracownikow.map(employee => `
-                <div style="background-color: ${employee.kolor};" class="employee-chip" onclick="location.href='../pages/profil.php?id=${employee.IdOsoba}';">
-                    ${employee.Imie} ${employee.Nazwisko}
+            const employeesHtml = event.listapracownikow && Array.isArray(event.listapracownikow)
+                ? event.listapracownikow.map(employee => `
+                <div style="background-color: ${employee.kolor};" class="employee-chip" onclick="location.href='../pages/profil.php?id=${employee.idosoba}';">
+                    ${employee.imie} ${employee.nazwisko}
                 </div>
             `).join('')
                 : '';
 
             eventsContainer.innerHTML += `
                 <div class="event-card">
-                    <div class="event-header" onclick="location.href='../pages/wydarzenie.php?id=${event.IdWydarzenia}';">
-                        ${event.NazwaWydarzenia} </br>
-                        ${event.Miejsce} - ${event.NazwaFirmy}
+                    <div class="event-header" onclick="location.href='../pages/wydarzenie.php?id=${event.idwydarzenia}';">
+                        ${event.nazwawydarzenia} </br>
+                        ${event.miejsce} - ${event.nazwafirmy}
                     </div>
                     <div class="event-dates">
-                        Od: ${event.DataPoczatek} &nbsp; Do: ${event.DataKoniec}
+                        Od: ${event.datapoczatek} &nbsp; Do: ${event.datakoniec}
                     </div>
                     <div class="event-employees">
                         <div>Lista pracowników:</div>
                         ${employeesHtml}
                     </div>
                     <div class="event-comment">
-                        Komentarz: ${event.Komentarz || 'Brak'}
+                        komentarz: ${event.komentarz || 'Brak'}
                     </div>
                 </div>
             `;

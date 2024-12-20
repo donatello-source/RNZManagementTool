@@ -5,11 +5,12 @@ require_once 'Database.php';
 class User {
     public static function getUserByEmail($email) {
         $db = (new Database())->connect();
-        $stmt = $db->prepare("SELECT * FROM osoby WHERE Email = ?");
-        $stmt->bind_param("s", $email);
+        $query = "SELECT * FROM osoby WHERE email = :email";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $user;
     }
 }
 ?>

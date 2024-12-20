@@ -1,17 +1,20 @@
 <?php
 
 class Database {
-    private $host = 'localhost';
+    private $host = 'host.docker.internal';
     private $dbname = 'rnzmanago';
     private $user = 'root';
-    private $pass = '';
+    private $pass = 'root';
     private $conn;
 
     public function connect() {
         if ($this->conn == null) {
-            $this->conn = new mysqli($this->host, $this->user, $this->pass, $this->dbname);
-            if ($this->conn->connect_error) {
-                die("Connection error: " . $this->conn->connect_error);
+            try {
+                $dsn = "pgsql:host=$this->host;dbname=$this->dbname";
+                $this->conn = new PDO($dsn, $this->user, $this->pass);
+                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (PDOException $e) {
+                die("Połączenie nie powiodło się: " . $e->getMessage());
             }
         }
         return $this->conn;

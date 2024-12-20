@@ -11,32 +11,35 @@ class FirmRepository
     public function getAllFirms(): array
     {
         $query = "
-            SELECT IdFirma, NazwaFirmy, AdresFirmy, NIP, Telefon
+            SELECT idfirma, nazwafirmy, adresfirmy, nip, telefon
             FROM firma
         ";
 
-        $result = $this->connection->query($query);
-        if (!$result || $result->num_rows === 0) {
+        $stmt = $this->connection->prepare($query);
+
+        if (!$stmt) {
             return [];
         }
-
-        $firms = [];
-        while ($row = $result->fetch_assoc()) {
-            $firms[] = [
-                'IdFirma' => $row['IdFirma'],
-                'NazwaFirmy' => $row['NazwaFirmy'],
-                'AdresFirmy' => $row['AdresFirmy'],
-                'NIP' => $row['NIP'],
-                'Telefon' => $row['Telefon']
+    
+        $stmt->execute();
+    
+        $firms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        return array_map(function ($row) {
+            return [
+                'idfirma' => $row['idfirma'],
+                'nazwafirmy' => $row['nazwafirmy'],
+                'adresfirmy' => $row['adresfirmy'],
+                'nip' => $row['nip'],
+                'telefon' => $row['telefon']
             ];
-        }
-
-        return $firms;
+        }, $firms);
     }
-    public function getFirm(int $firmId): array
+    
+        public function getFirm(int $firmId): array
     {
         $query = "
-            SELECT * FROM firma WHERE IdFirma = ?
+            SELECT * FROM firma WHERE idfirma = :firmId
         ";
 
         $stmt = $this->connection->prepare($query);
@@ -44,47 +47,36 @@ class FirmRepository
             return ['message' => 'Błąd podczas przygotowywania zapytania'];
         }
 
-        $stmt->bind_param("i", $firmId);
+        $stmt->bindParam(':firmId', $firmId, PDO::PARAM_INT);
         $stmt->execute();
 
-        $result = $stmt->get_result();
-
-        if ($result->num_rows === 0) {
+        $firm = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$firm) {
             return ['message' => 'Firma nie znaleziona'];
         }
 
-        $firm = [];
-
-        while ($row = $result->fetch_assoc()) {
-            if (empty($firm)) {
-                $firm = [
-                    'NazwaFirmy' => $row['NazwaFirmy'],
-                    'AdresFirmy' => $row['AdresFirmy'],
-                    'NIP' => $row['NIP'],
-                    'Telefon' => $row['Telefon'],
-                    'kolor' => $row['kolor']
-                ];
-            }
-        }
-
-        $stmt->close();
-
-        return $firm;
+        return [
+            'nazwafirmy' => $firm['nazwafirmy'],
+            'adresfirmy' => $firm['adresfirmy'],
+            'nip' => $firm['nip'],
+            'telefon' => $firm['telefon'],
+            'kolor' => $firm['kolor']
+        ];
     }
+
     public function deleteFirm(int $firmId): bool
     {
         try {
-            $stmt = $this->connection->prepare("DELETE FROM firma WHERE IdFirma = ?");
+            $stmt = $this->connection->prepare("DELETE FROM firma WHERE idfirma = :firmId");
             if (!$stmt) {
-                throw new Exception("Błąd przygotowania zapytania: " . $this->connection->error);
+                throw new Exception("Błąd przygotowania zapytania: " . implode(", ", $this->connection->errorInfo()));
             }
 
-            $stmt->bind_param('i', $firmId);
+            $stmt->bindParam(':firmId', $firmId, PDO::PARAM_INT);
             if (!$stmt->execute()) {
-                throw new Exception("Błąd podczas usuwania firmy: " . $stmt->error);
+                throw new Exception("Błąd podczas usuwania firmy: " . implode(", ", $stmt->errorInfo()));
             }
 
-            $stmt->close();
             return true;
         } catch (Exception $e) {
             error_log("Nie udało się usunąć firmy: " . $e->getMessage());
@@ -94,7 +86,7 @@ class FirmRepository
 
     public function updateFirm(int $firmId, array $data): bool
     {
-        $requiredFields = ['NazwaFirmy', 'AdresFirmy', 'Telefon', 'NIP', 'kolor'];
+        $requiredFields = ['nazwafirmy', 'nip'];
 
         foreach ($requiredFields as $field) {
             if (!isset($data[$field])) {
@@ -102,77 +94,100 @@ class FirmRepository
             }
         }
 
-        $nazwaFirmy = $this->connection->real_escape_string($data['NazwaFirmy']);
-        $adresFirmy = $this->connection->real_escape_string($data['AdresFirmy']);
-        $telefon = $this->connection->real_escape_string($data['Telefon']);
-        $nip = $this->connection->real_escape_string($data['NIP']);
-        $kolor = $this->connection->real_escape_string($data['kolor']);
-        $checkQuery = "SELECT * FROM firma WHERE IdFirma = $firmId";
-        $result = $this->connection->query($checkQuery);
+        try {
+            $stmt = $this->connection->prepare("
+                UPDATE firma 
+                SET nazwafirmy = :nazwafirmy, 
+                    adresfirmy = :adresfirmy, 
+                    telefon = :telefon, 
+                    nip = :nip, 
+                    kolor = :kolor 
+                WHERE idfirma = :firmId
+            ");
 
-        if ($result->num_rows === 0) {
-            throw new Exception("Firma o ID $firmId nie istnieje");
+            if (!$stmt) {
+                throw new Exception("Błąd przygotowania zapytania: " . implode(", ", $this->connection->errorInfo()));
+            }
+
+            $stmt->bindParam(':nazwafirmy', $data['nazwafirmy']);
+            $stmt->bindParam(':adresfirmy', $data['adresfirmy']);
+            $stmt->bindParam(':telefon', $data['telefon']);
+            $stmt->bindParam(':nip', $data['nip']);
+            $stmt->bindParam(':kolor', $data['kolor']);
+            $stmt->bindParam(':firmId', $firmId, PDO::PARAM_INT);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Błąd podczas aktualizacji danych firmy: " . implode(", ", $stmt->errorInfo()));
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Nie udało się zaktualizować danych firmy: " . $e->getMessage());
+            return false;
         }
-
-        $updateQuery = "UPDATE firma 
-                        SET NazwaFirmy = '$nazwaFirmy', 
-                            AdresFirmy = '$adresFirmy', 
-                            Telefon = '$telefon', 
-                            NIP = '$nip', 
-                            kolor = '$kolor' 
-                        WHERE IdFirma = $firmId";
-
-        if (!$this->connection->query($updateQuery)) {
-            throw new Exception("Błąd podczas aktualizacji danych firmy: " . $this->connection->error);
-        }
-
-        return true;
     }
+
+
+
     public function getFirmsSummary(int $month, int $year): array
     {
         $query = "
         SELECT 
-            f.NazwaFirmy,
-            w.NazwaWydarzenia,
+            f.nazwafirmy,
+            w.nazwawydarzenia,
             SUM(
                 CASE 
-                    WHEN wp.StawkaDzienna = 1 THEN (so.Stawka * 12 + wp.Nadgodziny * so.Stawka * 1.25)
+                    WHEN wp.stawkadzienna = true THEN (so.stawka * 12 + wp.nadgodziny * so.stawka * 1.25)
                     ELSE 0
                 END
-            ) AS SumaPracownikow,
-            w.DodatkoweKoszta
+            ) AS sumapracownikow,
+            w.dodatkowekoszta
         FROM wydarzenia w
-        JOIN firma f ON w.IdFirma = f.IdFirma
-        LEFT JOIN wydarzeniapracownicy wp ON w.IdWydarzenia = wp.IdWydarzenia
-        LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
-        WHERE MONTH(w.DataKoniec) = ? AND YEAR(w.DataKoniec) = ?
-        GROUP BY f.NazwaFirmy, w.NazwaWydarzenia, w.DodatkoweKoszta
-        ORDER BY f.NazwaFirmy, w.NazwaWydarzenia;
+        JOIN firma f ON w.idfirma = f.idfirma
+        LEFT JOIN wydarzeniapracownicy wp ON w.idwydarzenia = wp.idwydarzenia
+        LEFT JOIN stanowiskoosoba so ON so.idstanowiska = wp.idstanowiska AND so.idosoba = wp.idosoba
+        WHERE EXTRACT(MONTH FROM w.datakoniec) = :month AND EXTRACT(YEAR FROM w.datakoniec) = :year
+        GROUP BY f.nazwafirmy, w.nazwawydarzenia, w.dodatkowekoszta
+        ORDER BY f.nazwafirmy, w.nazwawydarzenia;
         ";
-
+    
         $stmt = $this->connection->prepare($query);
-        $stmt->bind_param('ii', $month, $year);
+        if (!$stmt) {
+            throw new Exception("Błąd w przygotowaniu zapytania: " . implode(", ", $this->connection->errorInfo()));
+        }
+    
+        $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+        $stmt->bindParam(':year', $year, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->get_result();
-
+    
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($result === false) {
+            throw new Exception("Błąd podczas wykonywania zapytania: " . implode(", ", $stmt->errorInfo()));
+        }
+    
+        if (empty($result)) {
+            return [];
+        }
+    
         $firms = [];
-        while ($row = $result->fetch_assoc()) {
-            $firmName = $row['NazwaFirmy'];
+        foreach ($result as $row) {
+            $firmName = $row['nazwafirmy'];
             if (!isset($firms[$firmName])) {
                 $firms[$firmName] = [
                     'wydarzenia' => [],
                     'suma' => 0
                 ];
             }
-
-            $sumaWydarzenia = $row['SumaPracownikow'] + $row['DodatkoweKoszta'];
+    
+            $sumaWydarzenia = $row['sumapracownikow'] + $row['dodatkowekoszta'];
             $firms[$firmName]['wydarzenia'][] = [
-                'nazwa' => $row['NazwaWydarzenia'],
+                'nazwa' => $row['nazwawydarzenia'],
                 'suma' => $sumaWydarzenia
             ];
             $firms[$firmName]['suma'] += $sumaWydarzenia;
         }
-
+    
         return $firms;
     }
+    
 }

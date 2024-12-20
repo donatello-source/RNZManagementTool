@@ -50,7 +50,6 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
                     <li><a href="main.php">Home</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
                     <li><a href="pracownicy.php">Pracownicy</a></li>
-                    <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="firmy.php">Firmy</a></li>
                     <li><a href="stanowiska.php">Stanowiska</a></li>
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>

@@ -12,293 +12,314 @@ class EventRepository
     public function getEvents(): array
     {
         $query = "
-            SELECT w.IdWydarzenia, w.NazwaWydarzenia, w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy, w.Hotel
+            SELECT w.idwydarzenia, w.nazwawydarzenia, w.idfirma, w.datapoczatek, w.datakoniec, w.miejsce, w.komentarz, f.nazwafirmy, w.hotel
             FROM wydarzenia w
-            JOIN firma f ON w.IdFirma = f.IdFirma
-            ORDER BY w.DataPoczatek
+            JOIN firma f ON w.idfirma = f.idfirma
+            ORDER BY w.datapoczatek
         ";
 
-        $result = $this->connection->query($query);
-        if (!$result || $result->num_rows === 0) {
+        $stmt = $this->connection->prepare($query);
+
+        if (!$stmt) {
             return [];
         }
+    
+        $stmt->execute();
 
-        $events = [];
-        while ($row = $result->fetch_assoc()) {
-            $events[] = [
-                'IdWydarzenia' => $row['IdWydarzenia'],
-                'NazwaWydarzenia' => $row['NazwaWydarzenia'],
-                'Miejsce' => $row['Miejsce'],
-                'NazwaFirmy' => $row['NazwaFirmy'],
-                'DataPoczatek' => $row['DataPoczatek'],
-                'DataKoniec' => $row['DataKoniec'],
-                'Komentarz' => $row['Komentarz']
-            ];
-        }
+         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return $events;
+    return array_map(function ($row) {
+        return [
+            'idwydarzenia' => $row['idwydarzenia'],
+            'nazwawydarzenia' => $row['nazwawydarzenia'],
+            'miejsce' => $row['miejsce'],
+            'nazwafirmy' => $row['nazwafirmy'],
+            'datapoczatek' => $row['datapoczatek'],
+            'datakoniec' => $row['datakoniec'],
+            'komentarz' => $row['komentarz']
+        ];
+    }, $events);
     }
     public function getDetailedEvents(): array
     {
         $query = "
-            SELECT w.IdWydarzenia, w.NazwaWydarzenia, w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy
+            SELECT w.idwydarzenia, w.nazwawydarzenia, w.idfirma, w.datapoczatek, w.datakoniec, w.miejsce, w.komentarz, f.nazwafirmy
             FROM wydarzenia w
-            JOIN firma f ON w.IdFirma = f.IdFirma
+            JOIN firma f ON w.idfirma = f.idfirma
         ";
 
         $result = $this->connection->query($query);
-        if (!$result || $result->num_rows === 0) {
+        if (!$result) {
             return [];
         }
 
         $events = [];
-        while ($row = $result->fetch_assoc()) {
-            $eventId = $row['IdWydarzenia'];
+        foreach ($result->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $eventId = $row['idwydarzenia'];
 
             $employeeQuery = "
-                SELECT DISTINCT o.Imie, o.Nazwisko, o.IdOsoba, o.kolor
+                SELECT DISTINCT o.imie, o.nazwisko, o.idosoba, o.kolor
                 FROM wydarzeniapracownicy wp
-                JOIN osoby o ON wp.IdOsoba = o.IdOsoba
-                WHERE wp.IdWydarzenia = ?
+                JOIN osoby o ON wp.idosoba = o.idosoba
+                WHERE wp.idwydarzenia = :eventId
             ";
 
             $employeeStmt = $this->connection->prepare($employeeQuery);
-            $employeeStmt->bind_param('i', $eventId);
+            $employeeStmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
             $employeeStmt->execute();
-            $employeeResult = $employeeStmt->get_result();
-
-            $employees = [];
-            while ($employeeRow = $employeeResult->fetch_assoc()) {
-                $employees[] = [
-                    'IdOsoba' => $employeeRow['IdOsoba'],
-                    'Imie' => $employeeRow['Imie'],
-                    'Nazwisko' => $employeeRow['Nazwisko'],
-                    'kolor' => $employeeRow['kolor']
-                ];
-            }
+            $employees = $employeeStmt->fetchAll(PDO::FETCH_ASSOC);
 
             $events[] = [
-                'IdWydarzenia' => $row['IdWydarzenia'],
-                'NazwaWydarzenia' => $row['NazwaWydarzenia'],
-                'Miejsce' => $row['Miejsce'],
-                'NazwaFirmy' => $row['NazwaFirmy'],
-                'DataPoczatek' => $row['DataPoczatek'],
-                'DataKoniec' => $row['DataKoniec'],
-                'ListaPracownikow' => $employees,
-                'Komentarz' => $row['Komentarz']
+                'idwydarzenia' => $row['idwydarzenia'],
+                'nazwawydarzenia' => $row['nazwawydarzenia'],
+                'miejsce' => $row['miejsce'],
+                'nazwafirmy' => $row['nazwafirmy'],
+                'datapoczatek' => $row['datapoczatek'],
+                'datakoniec' => $row['datakoniec'],
+                'listapracownikow' => array_map(function ($employeeRow) {
+                    return [
+                        'idosoba' => $employeeRow['idosoba'],
+                        'imie' => $employeeRow['imie'],
+                        'nazwisko' => $employeeRow['nazwisko'],
+                        'kolor' => $employeeRow['kolor']
+                    ];
+                }, $employees),
+                'komentarz' => $row['komentarz']
             ];
         }
-
         return $events;
     }
     public function getEvent(int $eventId): array
     {
         $query = "
-            SELECT w.IdWydarzenia, w.NazwaWydarzenia, w.IdFirma, w.DataPoczatek, w.DataKoniec, w.Miejsce, w.Komentarz, f.NazwaFirmy, w.Hotel, w.OsobaZarzadzajaca
+            SELECT w.idwydarzenia, w.nazwawydarzenia, w.idfirma, w.datapoczatek, w.datakoniec, w.miejsce, w.komentarz, f.nazwafirmy, w.hotel, w.osobazarzadzajaca
             FROM wydarzenia w
-            JOIN firma f ON w.IdFirma = f.IdFirma
-            WHERE w.IdWydarzenia = ?
+            JOIN firma f ON w.idfirma = f.idfirma
+            WHERE w.idwydarzenia = ?
         ";
     
         $stmt = $this->connection->prepare($query);
-        $stmt->bind_param("i", $eventId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-    
-        if ($result->num_rows === 0) {
+        $stmt->execute([$eventId]);
+        $event = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$event) {
             return ['message' => 'Wydarzenie nie znalezione'];
         }
-    
-        $event = $result->fetch_assoc();
-        $event['ListaPracownikow'] = $this->getEventEmployees($eventId);
-    
+        
+        $event['listapracownikow'] = $this->getEventEmployees($eventId);
+        
         return $event;
     }
     
     private function getEventEmployees(int $eventId): array
     {
         $query = "
-            SELECT o.Imie, o.Nazwisko, o.IdOsoba, o.kolor, wp.Dzien
+            SELECT o.imie, o.nazwisko, o.idosoba, o.kolor, wp.dzien
             FROM wydarzeniapracownicy wp
-            JOIN osoby o ON wp.IdOsoba = o.IdOsoba
-            WHERE wp.IdWydarzenia = ?
+            JOIN osoby o ON wp.idosoba = o.idosoba
+            WHERE wp.idwydarzenia = ?
         ";
     
         $stmt = $this->connection->prepare($query);
-        $stmt->bind_param("i", $eventId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-    
-        $employees = [];
-        while ($row = $result->fetch_assoc()) {
-            $employees[] = $row;
-        }
-    
-        return $employees;
+        $stmt->execute([$eventId]);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return $result ?: [];
     }
     
     
     
     public function updateEvent(int $eventId, array $data): array
-{
-    if (empty($data['firma']) || empty($data['nazwaWydarzenia']) || empty($data['miejsce']) || empty($data['data-poczatek'])) {
-        return ['error' => 'Wypełnij wymagane pola'];
-    }
-
-    $firma = $this->connection->real_escape_string($data['firma']);
-    $miejsce = $this->connection->real_escape_string($data['miejsce']);
-    $nazwawydarzenia = $this->connection->real_escape_string($data['nazwaWydarzenia']);
-    $hotel = $this->connection->real_escape_string($data['hotel'] ?? '');
-    $osobazarzadzajaca = $this->connection->real_escape_string($data['osoba-zarzadzajaca'] ?? '');
-    $dataPoczatek = $data['data-poczatek'];
-    $dataKoniec = $data['data-koniec'] ?? $dataPoczatek;
-    $komentarz = $this->connection->real_escape_string($data['komentarz'] ?? '');
-    $pracownicy = $data['pracownicy'] ?? [];
-
-    $result = $this->connection->query("SELECT * FROM wydarzenia WHERE IdWydarzenia = '$eventId'");
-    if ($result->num_rows === 0) {
-        return ['error' => 'Wydarzenie o podanym ID nie istnieje'];
-    }
-
-    $resultFirma = $this->connection->query("SELECT IdFirma FROM firma WHERE NazwaFirmy = '$firma'");
-    if ($resultFirma->num_rows === 0) {
-        return ['error' => 'Podana firma nie istnieje'];
-    }
-
-    $idFirma = $resultFirma->fetch_assoc()['IdFirma'];
-
-    $query = "UPDATE wydarzenia 
-            SET IdFirma = '$idFirma', 
-                Miejsce = '$miejsce', 
-                NazwaWydarzenia = '$nazwawydarzenia', 
-                DataPoczatek = '$dataPoczatek', 
-                DataKoniec = '$dataKoniec', 
-                Komentarz = '$komentarz',
-                Hotel = '$hotel',
-                OsobaZarzadzajaca = '$osobazarzadzajaca'
-            WHERE IdWydarzenia = '$eventId'";
-
-    if (!$this->connection->query($query)) {
-        return ['error' => 'Błąd podczas aktualizacji wydarzenia'];
-    }
-
-    $this->connection->query("DELETE FROM wydarzeniapracownicy WHERE IdWydarzenia = '$eventId'");
-
-    foreach ($pracownicy as $pracownik) {
-        $dniPracownika = $data['dni'][$pracownik] ?? [];
-
-        if (!empty($dniPracownika)) {
-            foreach ($dniPracownika as $dzien) {
-                $dzien = $this->connection->real_escape_string($dzien);
-                $this->connection->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
-                                VALUES ('$eventId', '$pracownik', '$dzien')");
-            }
-        } else {
-            $this->connection->query("INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
-                            VALUES ('$eventId', '$pracownik', '0')");
+    {
+        if (empty($data['firma']) || empty($data['nazwaWydarzenia']) || empty($data['miejsce']) || empty($data['data-poczatek'])) {
+            return ['error' => 'Wypełnij wymagane pola'];
         }
+        $firma = $data['firma'];
+        $miejsce = $data['miejsce'];
+        $nazwawydarzenia = $data['nazwaWydarzenia'];
+        $hotel = $data['hotel'] ?? '';
+        $osobazarzadzajaca = $data['osoba-zarzadzajaca'] ?? '';
+        $datapoczatek = $data['data-poczatek'];
+        $datakoniec = $data['data-koniec'] ?? $datapoczatek;
+        $komentarz = $data['komentarz'] ?? '';
+        $pracownicy = $data['pracownicy'] ?? [];
+    
+        $query = "SELECT * FROM wydarzenia WHERE idwydarzenia = :eventId";
+        $result = $this->connection->prepare($query);
+        $result->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+        $result->execute();
+    
+        if ($result->rowCount() == 0) {
+            return ['error' => 'Wydarzenie o podanym ID nie istnieje'];
+        }
+            $queryFirma = "SELECT idfirma FROM firma WHERE nazwafirmy = :firmaNazwa";
+        $resultFirma = $this->connection->prepare($queryFirma);
+        $resultFirma->bindParam(':firmaNazwa', $firma, PDO::PARAM_STR);
+        $resultFirma->execute();
+    
+        if ($resultFirma->rowCount() === 0) {
+            return ['error' => 'Podana firma nie istnieje'];
+        }
+    
+        $idfirma = $resultFirma->fetch(PDO::FETCH_ASSOC)['idfirma'];
+            $queryUpdate = "UPDATE wydarzenia 
+                        SET idfirma = :idfirma, 
+                            miejsce = :miejsce, 
+                            nazwawydarzenia = :nazwawydarzenia, 
+                            datapoczatek = :datapoczatek, 
+                            datakoniec = :datakoniec, 
+                            komentarz = :komentarz,
+                            hotel = :hotel,
+                            osobazarzadzajaca = :osobazarzadzajaca
+                        WHERE idwydarzenia = :eventId";
+    
+        $stmt = $this->connection->prepare($queryUpdate);
+        $stmt->bindParam(':idfirma', $idfirma, PDO::PARAM_INT);
+        $stmt->bindParam(':miejsce', $miejsce, PDO::PARAM_STR);
+        $stmt->bindParam(':nazwawydarzenia', $nazwawydarzenia, PDO::PARAM_STR);
+        $stmt->bindParam(':datapoczatek', $datapoczatek, PDO::PARAM_STR);
+        $stmt->bindParam(':datakoniec', $datakoniec, PDO::PARAM_STR);
+        $stmt->bindParam(':komentarz', $komentarz, PDO::PARAM_STR);
+        $stmt->bindParam(':hotel', $hotel, PDO::PARAM_STR);
+        $stmt->bindParam(':osobazarzadzajaca', $osobazarzadzajaca, PDO::PARAM_STR);
+        $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+        
+        if (!$stmt->execute()) {
+            return ['error' => 'Błąd podczas aktualizacji wydarzenia'];
+        }
+    
+        $this->connection->prepare("DELETE FROM wydarzeniapracownicy WHERE idwydarzenia = :eventId")
+            ->execute([':eventId' => $eventId]);
+            foreach ($pracownicy as $pracownik) {
+            $dnipracownika = $data['dni'][$pracownik] ?? [];
+    
+            if (!empty($dnipracownika)) {
+                foreach ($dnipracownika as $dzien) {
+                    $queryPracownik = "INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien) 
+                                    VALUES (:eventId, :pracownik, :dzien)";
+                    $stmtPracownik = $this->connection->prepare($queryPracownik);
+                    $stmtPracownik->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+                    $stmtPracownik->bindParam(':pracownik', $pracownik, PDO::PARAM_INT);
+                    $stmtPracownik->bindParam(':dzien', $dzien, PDO::PARAM_STR);
+                    $stmtPracownik->execute();
+                }
+            } else {
+                $queryPracownik = "INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien) 
+                                VALUES (:eventId, :pracownik, '0')";
+                $stmtPracownik = $this->connection->prepare($queryPracownik);
+                $stmtPracownik->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+                $stmtPracownik->bindParam(':pracownik', $pracownik, PDO::PARAM_INT);
+                $stmtPracownik->execute();
+            }
+        }
+    
+        return ['message' => 'Wydarzenie zostało zaktualizowane pomyślnie'];
     }
-
-    return ['message' => 'Wydarzenie zostało zaktualizowane pomyślnie'];
-}
-
     public function deleteEvent(int $eventId): bool
     {
-        $deleteEmployeesQuery = "DELETE FROM wydarzeniapracownicy WHERE IdWydarzenia = ?";
+        $deleteEmployeesQuery = "DELETE FROM wydarzeniapracownicy WHERE idwydarzenia = :eventId";
         $stmt = $this->connection->prepare($deleteEmployeesQuery);
-        $stmt->bind_param("i", $eventId);
+        $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
         $stmt->execute();
 
-        $deleteEventQuery = "DELETE FROM wydarzenia WHERE IdWydarzenia = ?";
+        $deleteEventQuery = "DELETE FROM wydarzenia WHERE idwydarzenia = :eventId";
         $stmt = $this->connection->prepare($deleteEventQuery);
-        $stmt->bind_param("i", $eventId);
+        $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+        
         return $stmt->execute();
     }
 
     public function addEvent(array $eventData): bool
     {
-        $this->connection->begin_transaction();
-
+        $this->connection->beginTransaction();
+    
         try {
-            $firma = $this->connection->real_escape_string($eventData['firma']);
-            $miejsce = $this->connection->real_escape_string($eventData['miejsce']);
-            $nazwaWydarzenia = $this->connection->real_escape_string($eventData['nazwaWydarzenia']);
-            $dataPoczatek = $eventData['data-poczatek'];
-            $dataKoniec = $eventData['data-koniec'] ?? $dataPoczatek;
-            $komentarz = $this->connection->real_escape_string($eventData['komentarz'] ?? '');
-            $hotel = $this->connection->real_escape_string($eventData['hotel'] ?? '');
-            $osobazarzadzajaca = $this->connection->real_escape_string($eventData['osoba-zarzadzajaca'] ?? '');
+            $firma = $eventData['firma'];
+            $miejsce = $eventData['miejsce'];
+            $nazwawydarzenia = $eventData['nazwaWydarzenia'];
+            $datapoczatek = $eventData['data-poczatek'];
+            $datakoniec = $eventData['data-koniec'] ?? $datapoczatek;
+            $komentarz = $eventData['komentarz'] ?? '';
+            $hotel = $eventData['hotel'] ?? '';
+            $osobazarzadzajaca = $eventData['osoba-zarzadzajaca'] ?? '';
             $pracownicy = $eventData['pracownicy'] ?? [];
-
-            $stmt = $this->connection->prepare("SELECT IdFirma FROM firma WHERE NazwaFirmy = ?");
+    
+            $stmt = $this->connection->prepare("SELECT idfirma FROM firma WHERE nazwafirmy = :firma");
             if (!$stmt) {
-                throw new Exception("Błąd przygotowania zapytania: " . $this->connection->error);
+                throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
             }
-
-            $stmt->bind_param('s', $firma);
+    
+            $stmt->bindParam(':firma', $firma, PDO::PARAM_STR);
             $stmt->execute();
-            $result = $stmt->get_result();
-
-            if ($result->num_rows === 0) {
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if (!$result) {
                 throw new Exception("Podana firma nie istnieje");
             }
-
-            $idFirma = $result->fetch_assoc()['IdFirma'];
-            $stmt->close();
-
+    
+            $idfirma = $result['idfirma'];
+    
             $stmt = $this->connection->prepare("
-                INSERT INTO wydarzenia (IdFirma, NazwaWydarzenia, Miejsce, DataPoczatek, DataKoniec, Komentarz, Hotel, OsobaZarzadzajaca) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO wydarzenia (idfirma, nazwawydarzenia, miejsce, datapoczatek, datakoniec, komentarz, hotel, osobazarzadzajaca)
+                VALUES (:idfirma, :nazwawydarzenia, :miejsce, :datapoczatek, :datakoniec, :komentarz, :hotel, :osobazarzadzajaca)
             ");
             if (!$stmt) {
-                throw new Exception("Błąd przygotowania zapytania: " . $this->connection->error);
+                throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
             }
-
-            $stmt->bind_param('isssssss', $idFirma, $nazwaWydarzenia, $miejsce, $dataPoczatek, $dataKoniec, $komentarz, $hotel, $osobazarzadzajaca);
+    
+            $stmt->bindParam(':idfirma', $idfirma, PDO::PARAM_INT);
+            $stmt->bindParam(':nazwawydarzenia', $nazwawydarzenia, PDO::PARAM_STR);
+            $stmt->bindParam(':miejsce', $miejsce, PDO::PARAM_STR);
+            $stmt->bindParam(':datapoczatek', $datapoczatek, PDO::PARAM_STR);
+            $stmt->bindParam(':datakoniec', $datakoniec, PDO::PARAM_STR);
+            $stmt->bindParam(':komentarz', $komentarz, PDO::PARAM_STR);
+            $stmt->bindParam(':hotel', $hotel, PDO::PARAM_STR);
+            $stmt->bindParam(':osobazarzadzajaca', $osobazarzadzajaca, PDO::PARAM_STR);
+            
             if (!$stmt->execute()) {
-                throw new Exception("Błąd podczas dodawania wydarzenia: " . $stmt->error);
+                throw new Exception("Błąd podczas dodawania wydarzenia: " . $stmt->errorInfo());
             }
-
-            $idWydarzenia = $stmt->insert_id;
-            $stmt->close();
-
-            foreach ($pracownicy as $pracownik) {
-                $dniPracownika = $eventData['dni'][$pracownik] ?? [];
-
-                if (!empty($dniPracownika)) {
-                    foreach ($dniPracownika as $dzien) {
+    
+            $idwydarzenia = $this->connection->lastInsertId();
+                foreach ($pracownicy as $pracownik) {
+                $dnipracownika = $eventData['dni'][$pracownik] ?? [];
+    
+                if (!empty($dnipracownika)) {
+                    foreach ($dnipracownika as $dzien) {
                         $stmt = $this->connection->prepare("
-                            INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
-                            VALUES (?, ?, ?)
+                            INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien)
+                            VALUES (:idwydarzenia, :pracownik, :dzien)
                         ");
                         if (!$stmt) {
-                            throw new Exception("Błąd przygotowania zapytania: " . $this->connection->error);
+                            throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
                         }
-
-                        $stmt->bind_param('iis', $idWydarzenia, $pracownik, $dzien);
+    
+                        $stmt->bindParam(':idwydarzenia', $idwydarzenia, PDO::PARAM_INT);
+                        $stmt->bindParam(':pracownik', $pracownik, PDO::PARAM_INT);
+                        $stmt->bindParam(':dzien', $dzien, PDO::PARAM_STR);
+    
                         if (!$stmt->execute()) {
-                            throw new Exception("Błąd podczas przypisywania pracownika: " . $stmt->error);
+                            throw new Exception("Błąd podczas przypisywania pracownika: " . $stmt->errorInfo());
                         }
-                        $stmt->close();
                     }
                 } else {
                     $stmt = $this->connection->prepare("
-                        INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien) 
-                        VALUES (?, ?, '0')
+                        INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien)
+                        VALUES (:idwydarzenia, :pracownik, '0')
                     ");
                     if (!$stmt) {
-                        throw new Exception("Błąd przygotowania zapytania: " . $this->connection->error);
+                        throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
                     }
-
-                    $stmt->bind_param('ii', $idWydarzenia, $pracownik);
+    
+                    $stmt->bindParam(':idwydarzenia', $idwydarzenia, PDO::PARAM_INT);
+                    $stmt->bindParam(':pracownik', $pracownik, PDO::PARAM_INT);
+    
                     if (!$stmt->execute()) {
-                        throw new Exception("Błąd podczas przypisywania pracownika: " . $stmt->error);
+                        throw new Exception("Błąd podczas przypisywania pracownika: " . $stmt->errorInfo());
                     }
-                    $stmt->close();
                 }
             }
-
-            $this->connection->commit();
+                $this->connection->commit();
             return true;
         } catch (Exception $e) {
             $this->connection->rollback();
@@ -306,168 +327,202 @@ class EventRepository
             return false;
         }
     }
+    
+
     public function saveEmployeeEventDays(int $userId, int $eventId, array $days): bool
     {
-        $this->connection->begin_transaction();
-
+        $this->connection->beginTransaction();
+    
         try {
             foreach ($days as $day) {
-                $dzien = $this->connection->real_escape_string($day['dzień']);
-                $idStanowiska = $day['idStanowiska'] ? $this->connection->real_escape_string($day['idStanowiska']) : 'NULL';
-                $stawkaDzienna = $day['obecność'];
-                $nadgodziny = $this->connection->real_escape_string($day['nadgodziny']);
-
                 $query = "
-                    INSERT INTO wydarzeniapracownicy (IdWydarzenia, IdOsoba, Dzien, IdStanowiska, StawkaDzienna, Nadgodziny)
-                    VALUES ('$eventId', '$userId', '$dzien', $idStanowiska, '$stawkaDzienna', '$nadgodziny')
-                    ON DUPLICATE KEY UPDATE 
-                        IdStanowiska = VALUES(IdStanowiska),
-                        StawkaDzienna = VALUES(StawkaDzienna),
-                        Nadgodziny = VALUES(Nadgodziny)
+                    INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien, idstanowiska, stawkadzienna, nadgodziny)
+                    VALUES (:eventId, :userId, :dzien, :idstanowiska, :stawkadzienna, :nadgodziny)
+                    ON CONFLICT (idwydarzenia, idosoba, dzien) DO UPDATE SET
+                        idstanowiska = EXCLUDED.idstanowiska,
+                        stawkadzienna = EXCLUDED.stawkadzienna,
+                        nadgodziny = EXCLUDED.nadgodziny;
                 ";
-
-                if (!$this->connection->query($query)) {
-                    throw new Exception("Błąd zapisu: " . $this->connection->error);
+    
+                $stmt = $this->connection->prepare($query);
+    
+                if (!$stmt) {
+                    throw new Exception("Błąd przygotowania zapytania: " . implode(", ", $this->connection->errorInfo()));
+                }
+    
+                $dzien = $day['dzień'];
+                $idstanowiska = $day['idstanowiska'] ?? null;
+                $stawkadzienna = $day['obecność'];
+                $nadgodziny = $day['nadgodziny'];
+    
+                $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+                $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+                $stmt->bindParam(':dzien', $dzien, PDO::PARAM_STR);
+                $stmt->bindParam(':idstanowiska', $idstanowiska, $idstanowiska === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+                $stmt->bindParam(':stawkadzienna', $stawkadzienna, PDO::PARAM_BOOL);
+                $stmt->bindParam(':nadgodziny', $nadgodziny, PDO::PARAM_INT);
+    
+                if (!$stmt->execute()) {
+                    throw new Exception("Błąd zapisu: " . implode(", ", $stmt->errorInfo()));
                 }
             }
-
+    
             $this->connection->commit();
             return true;
         } catch (Exception $e) {
-            $this->connection->rollback();
+            $this->connection->rollBack();
             throw $e;
         }
     }
+    
     public function getEmployeePayouts(int $employeeId, int $month, int $year): array
     {
         $query = "
         SELECT
-            IdWydarzenia,
-            NazwaWydarzenia,
-            IdOsoba,
-            Dzien,
-            StawkaGodzinowa,
-            StawkaDzienna,
-            Nadgodziny,
-            IdStanowiska
+            idwydarzenia,
+            nazwawydarzenia,
+            idosoba,
+            dzien,
+            stawkagodzinowa,
+            stawkadzienna,
+            nadgodziny,
+            idstanowiska
         FROM (
             SELECT
-                wp.IdWydarzenia,
-                w.NazwaWydarzenia,
-                wp.IdOsoba,
-                wp.Dzien,
-                so.Stawka AS StawkaGodzinowa,
-                wp.StawkaDzienna,
-                wp.Nadgodziny,
-                wp.IdStanowiska,
+                wp.idwydarzenia,
+                w.nazwawydarzenia,
+                wp.idosoba,
+                wp.dzien,
+                so.stawka AS stawkagodzinowa,
+                wp.stawkadzienna,
+                wp.nadgodziny,
+                wp.idstanowiska,
                 ROW_NUMBER() OVER (
-                    PARTITION BY wp.IdWydarzenia, wp.Dzien
-                    ORDER BY so.Stawka DESC, wp.StawkaDzienna DESC, wp.Nadgodziny DESC
+                    PARTITION BY wp.idwydarzenia, wp.dzien
+                    ORDER BY so.stawka DESC, wp.stawkadzienna DESC, wp.nadgodziny DESC
                 ) AS RowNum
             FROM wydarzeniapracownicy wp
-            JOIN wydarzenia w ON wp.IdWydarzenia = w.IdWydarzenia
-            LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
-            WHERE so.Stawka > 0
-            AND wp.IdOsoba = ?
-            AND MONTH(w.DataKoniec) = ?
-            AND YEAR(w.DataKoniec) = ?
+            JOIN wydarzenia w ON wp.idwydarzenia = w.idwydarzenia
+            LEFT JOIN stanowiskoosoba so ON so.idstanowiska = wp.idstanowiska AND so.idosoba = wp.idosoba
+            WHERE so.stawka > 0
+            AND wp.idosoba = :employeeId
+            AND EXTRACT(MONTH FROM w.datakoniec) = :month
+            AND EXTRACT(YEAR FROM w.datakoniec) = :year
         ) AS DistinctAssignments
         WHERE RowNum = 1
-        ORDER BY Dzien, IdWydarzenia;
-    ";
-    
+        ORDER BY dzien, idwydarzenia;
+        ";
     
         $stmt = $this->connection->prepare($query);
         if (!$stmt) {
-            throw new Exception("Błąd w przygotowaniu zapytania: " . $this->connection->error);
+            throw new Exception("Błąd w przygotowaniu zapytania: " . implode(", ", $this->connection->errorInfo()));
         }
     
-        $stmt->bind_param("iii", $employeeId, $month, $year);
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
+        $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+        $stmt->bindParam(':year', $year, PDO::PARAM_INT);
         $stmt->execute();
     
-        $result = $stmt->get_result();
-        if (!$result) {
-            throw new Exception("Błąd podczas wykonywania zapytania: " . $stmt->error);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($result)) {
+            return [];
+        }
+        if ($result === false) {
+                throw new Exception("Błąd podczas wykonywania zapytania: " . implode(", ", $stmt->errorInfo()));
         }
     
         $events = [];
-        while ($row = $result->fetch_assoc()) {
-            $eventId = $row['IdWydarzenia'];
+        foreach ($result as $row) {
+            $eventId = $row['idwydarzenia'];
             if (!isset($events[$eventId])) {
                 $events[$eventId] = [
-                    'nazwa' => $row['NazwaWydarzenia'],
+                    'nazwa' => $row['nazwawydarzenia'],
                     'dni' => [],
                     'suma' => 0,
                 ];
             }
     
-            $stawka = $row['StawkaGodzinowa'];
-            $nadgodziny = $row['Nadgodziny'];
-            $stawkaNadgodziny = $stawka * 1.25;
+            $stawka = $row['stawkagodzinowa'];
+            $nadgodziny = $row['nadgodziny'];
+            $stawkanadgodziny = $stawka * 1.25;
     
-            $zarobekDzien = ($stawka * 12) + ($stawkaNadgodziny * $nadgodziny);
+            $zarobekdzien = ($stawka * 12) + ($stawkanadgodziny * $nadgodziny);
             $events[$eventId]['dni'][] = [
-                'dzien' => $row['Dzien'],
-                'stanowisko' => $row['IdStanowiska'],
+                'dzien' => $row['dzien'],
+                'stanowisko' => $row['idstanowiska'],
                 'stawka' => $stawka,
                 'nadgodziny' => $nadgodziny,
-                'zarobek' => $zarobekDzien,
+                'zarobek' => $zarobekdzien,
             ];
     
-            $events[$eventId]['suma'] += $zarobekDzien;
+            $events[$eventId]['suma'] += $zarobekdzien;
         }
     
         return $events;
     }
-
+    
     public function getEventsSummary(int $month, int $year): array
     {
         $query = "
         SELECT 
-            w.NazwaWydarzenia,
-            w.DataKoniec,
-            wp.IdOsoba,
-            CONCAT(o.Imie, ' ', o.Nazwisko) AS Pracownik,
+            w.nazwawydarzenia,
+            w.datakoniec,
+            wp.idosoba,
+            CONCAT(o.imie, ' ', o.nazwisko) AS pracownik,
             SUM(
                 CASE 
-                    WHEN wp.StawkaDzienna = 1 THEN (so.Stawka * 12 + wp.Nadgodziny * so.Stawka * 1.25)
+                    WHEN wp.stawkadzienna = true THEN (so.stawka * 12 + wp.nadgodziny * so.stawka * 1.25)
                     ELSE 0
                 END
-            ) AS SumaPracownikow,
-            w.DodatkoweKoszta
+            ) AS sumapracownikow,
+            w.dodatkowekoszta
         FROM wydarzenia w
-        LEFT JOIN wydarzeniapracownicy wp ON w.IdWydarzenia = wp.IdWydarzenia
-        LEFT JOIN osoby o ON wp.IdOsoba = o.IdOsoba
-        LEFT JOIN stanowiskoosoba so ON so.IdStanowiska = wp.IdStanowiska AND so.IdOsoba = wp.IdOsoba
-        WHERE MONTH(w.DataKoniec) = ? AND YEAR(w.DataKoniec) = ?
-        GROUP BY w.IdWydarzenia, w.NazwaWydarzenia, w.DataKoniec, wp.IdOsoba, o.Imie, o.Nazwisko, w.DodatkoweKoszta
-        ORDER BY w.NazwaWydarzenia, wp.IdOsoba;
+        LEFT JOIN wydarzeniapracownicy wp ON w.idwydarzenia = wp.idwydarzenia
+        LEFT JOIN osoby o ON wp.idosoba = o.idosoba
+        LEFT JOIN stanowiskoosoba so ON so.idstanowiska = wp.idstanowiska AND so.idosoba = wp.idosoba
+        WHERE EXTRACT(MONTH FROM w.datakoniec) = :month AND EXTRACT(YEAR FROM w.datakoniec) = :year
+        GROUP BY w.idwydarzenia, w.nazwawydarzenia, w.datakoniec, wp.idosoba, o.imie, o.nazwisko, w.dodatkowekoszta
+        ORDER BY w.nazwawydarzenia, wp.idosoba;
         ";
-
+    
         $stmt = $this->connection->prepare($query);
-        $stmt->bind_param('ii', $month, $year);
+        if (!$stmt) {
+            throw new Exception("Błąd w przygotowaniu zapytania: " . implode(", ", $this->connection->errorInfo()));
+        }
+    
+        $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+        $stmt->bindParam(':year', $year, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->get_result();
-
+    
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($result === false) {
+            throw new Exception("Błąd podczas wykonywania zapytania: " . implode(", ", $stmt->errorInfo()));
+        }
+    
+        if (empty($result)) {
+            return [];
+        }
+    
         $events = [];
-        while ($row = $result->fetch_assoc()) {
-            $eventName = $row['NazwaWydarzenia'];
+        foreach ($result as $row) {
+            $eventName = $row['nazwawydarzenia'];
             if (!isset($events[$eventName])) {
                 $events[$eventName] = [
-                    'data' => $row['DataKoniec'],
+                    'data' => $row['datakoniec'],
                     'pracownicy' => [],
                     'suma' => 0
                 ];
             }
-
+    
             $events[$eventName]['pracownicy'][] = [
-                'pracownik' => $row['Pracownik'],
-                'suma' => $row['SumaPracownikow']
+                'pracownik' => $row['pracownik'],
+                'suma' => $row['sumapracownikow']
             ];
-            $events[$eventName]['suma'] += $row['SumaPracownikow'] + $row['DodatkoweKoszta'];
+            $events[$eventName]['suma'] += $row['sumapracownikow'] + $row['dodatkowekoszta'];
         }
-
+    
         return $events;
     }
+    
     
 }

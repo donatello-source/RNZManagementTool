@@ -4,14 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-
         const formData = new FormData(form);
         const month = formData.get('month').split("-")[1];
         const year = formData.get('month').split("-")[0];
 
         try {
             const response = await fetch(
-                `/RNZManagementTool/getEmployeePayouts?month=${month}&year=${year}`);
+                `/getEmployeePayouts?month=${month}&year=${year}`);
             const data = await response.json();
             console.log(data);
             if (data.error) {

@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('work-time-container');
 
     const [events, positions] = await Promise.all([
-        fetch('/RNZManagementTool/getEmployeeEvents').then(res => res.json()),
-        fetch('/RNZManagementTool/getEmployeePositions').then(res => res.json()),
+        fetch('/getEmployeeEvents').then(res => res.json()),
+        fetch('/getEmployeePositions').then(res => res.json()),
     ]);
     if (events.message) {
         const noEventsMessage = document.createElement('div');
@@ -15,36 +15,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     events.forEach(event => {
         const eventCard = document.createElement('div');
         eventCard.classList.add('event-card');
-        eventCard.setAttribute('data-id-wydarzenia', event.IdWydarzenia);
+        eventCard.setAttribute('data-id-wydarzenia', event.idwydarzenia);
 
         const header = `
-            <div class="event-header">${event.NazwaWydarzenia}</div>
+            <div class="event-header">${event.nazwawydarzenia}</div>
             <div class="event-details">
-                ${event.NazwaFirmy} - ${event.Miejsce}<br>
-                ${event.DataPoczatek} - ${event.DataKoniec}
+                ${event.nazwafirmy} - ${event.miejsce}<br>
+                ${event.datapoczatek} - ${event.datakoniec}
             </div>
         `;
 
         let workDays = '';
-        event.DniPracy.forEach(day => {
+        event.dnipracy.forEach(day => {
             const options = positions.map(position => `
-                <option value="${position.IdStanowiska}" 
-                        ${day.IdStanowiska === position.IdStanowiska ? 'selected' : ''}>
-                    ${position.NazwaStanowiska}
+                <option value="${position.idstanowiska}" 
+                        ${day.idstanowiska === position.idstanowiska ? 'selected' : ''}>
+                    ${position.nazwastanowiska}
                 </option>
             `).join('');
 
             workDays += `
                 <div class="work-day">
-                    <label>${day.Dzien}</label>
+                    <label>${day.dzien}</label>
                     Obecność:
-                    <input type="checkbox" class="presence" ${day.StawkaDzienna == 1 ? 'checked' : ''}>
+                    <input type="checkbox" class="presence" ${day.stawkadzienna == 1 ? 'checked' : ''}>
                     Stanowisko:
                     <select disabled>
                     ${options}
                     </select>
-                    Nadgodziny:
-                    <input type="number" class="overtime" value="${day.Nadgodziny || 0}" disabled>
+                    nadgodziny:
+                    <input type="number" class="overtime" value="${day.nadgodziny || 0}" disabled>
                 </div>
             `;
         });
@@ -80,7 +80,7 @@ function addEventListeners() {
                 return {
                     obecność: checkbox.checked ? 1 : 0,
                     dzień: day.querySelector('label').textContent,
-                    idStanowiska: checkbox.checked ? parseInt(select.value, 10) : null,
+                    idstanowiska: checkbox.checked ? parseInt(select.value, 10) : null,
                     nadgodziny: checkbox.checked ? parseInt(overtimeInput.value, 10) || 0 : 0,
                 };
             });
@@ -91,7 +91,7 @@ function addEventListeners() {
             };
             console.log(payload);
 
-            fetch('/RNZManagementTool/saveEmployeeEventDays', {
+            fetch('/saveEmployeeEventDays', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

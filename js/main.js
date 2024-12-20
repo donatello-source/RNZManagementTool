@@ -8,7 +8,7 @@ class EventManager {
 
     async fetchEvents() {
         try {
-            const response = await fetch('/RNZManagementTool/getEvents');
+            const response = await fetch('/getEvents');
             this.events = await response.json();
             this.processEvents();
         } catch (error) {
@@ -21,9 +21,8 @@ class EventManager {
 
         this.ongoingEvents = [];
         this.pastEvents = [];
-
         this.events.forEach(event => {
-            const endDate = new Date(event.DataKoniec);
+            const endDate = new Date(event.datakoniec);
             endDate.setDate(endDate.getDate() + 1);
 
             if (endDate >= now) {
@@ -38,14 +37,14 @@ class EventManager {
     }
 
     sortEvents() {
-        this.ongoingEvents.sort((a, b) => new Date(a.DataPoczatek) - new Date(b.DataPoczatek));
-        this.pastEvents.sort((a, b) => new Date(b.DataPoczatek) - new Date(a.DataPoczatek));
+        this.ongoingEvents.sort((a, b) => new Date(a.datapoczatek) - new Date(b.datapoczatek));
+        this.pastEvents.sort((a, b) => new Date(b.datapoczatek) - new Date(a.datapoczatek));
     }
 
     generateEventHTML(event) {
         const now = new Date();
-        const startDate = new Date(event.DataPoczatek);
-        const endDate = new Date(event.DataKoniec);
+        const startDate = new Date(event.datapoczatek);
+        const endDate = new Date(event.datakoniec);
         const diffInDays = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
         const diffInDaysE = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
 
@@ -61,12 +60,12 @@ class EventManager {
 
         return `
             <div class="event-card ${colorClass}">
-                <div class="event-header" onclick="location.href='wydarzenie.php?id=${event.IdWydarzenia}';">
-                    ${event.NazwaWydarzenia} </br>
-                    ${event.Miejsce} - ${event.NazwaFirmy}
+                <div class="event-header" onclick="location.href='wydarzenie.php?id=${event.idwydarzenia}';">
+                    ${event.nazwawydarzenia} </br>
+                    ${event.miejsce} - ${event.nazwafirmy}
                 </div>
                 <div class="event-dates">
-                    Od: ${event.DataPoczatek} &nbsp; Do: ${event.DataKoniec}
+                    Od: ${event.datapoczatek} &nbsp; Do: ${event.datakoniec}
                 </div>
             </div>
         `;

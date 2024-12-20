@@ -2,18 +2,14 @@
 
 require_once 'AppController.php';
 require_once __DIR__ . '/../repository/EventRepository.php';
-require_once __DIR__ . '/../repository/DetailedEventRepository.php';
 require_once __DIR__ . '/../repository/EmployeeRepository.php';
 require_once __DIR__ . '/../repository/FirmRepository.php';
-require_once __DIR__ . '/../repository/PositionRepository.php';
 
 class MainController extends AppController
 {
     private $eventRepository;
-    private $detailedEventRepository;
     private $employeeRepository;
     private $firmRepository;
-    private $positionRepository;
 
     public function __construct()
     {
@@ -21,7 +17,6 @@ class MainController extends AppController
         $this->eventRepository = new EventRepository();
         $this->employeeRepository = new EmployeeRepository();
         $this->firmRepository = new FirmRepository();
-        $this->positionRepository = new PositionRepository();
     }
 
     public function main()

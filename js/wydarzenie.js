@@ -32,35 +32,34 @@ function generateTable(pracownicy) {
     }
     table.appendChild(headerRow);
 
-    // Tworzenie wierszy dla pracowników
     const groupedByPracownik = pracownicy.reduce((acc, pracownik) => {
-        if (!acc[pracownik.IdOsoba]) acc[pracownik.IdOsoba] = [];
-        acc[pracownik.IdOsoba].push(pracownik.Dzien);
+        if (!acc[pracownik.idosoba]) acc[pracownik.idosoba] = [];
+        acc[pracownik.idosoba].push(pracownik.dzien);
         return acc;
     }, {});
     selectedPracownicy.forEach(pracownik => {
         const row = document.createElement("tr");
 
         const nameCell = document.createElement("td");
-        nameCell.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
+        nameCell.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
         nameCell.style.backgroundColor = pracownik.kolor;
         nameCell.style.color = getComplementaryColor(pracownik.kolor);
         row.appendChild(nameCell);
-        selectedDays[pracownik.IdOsoba] = [];
+        selectedDays[pracownik.idosoba] = [];
         dates.forEach(date => {
             const cell = document.createElement("td");
             const cellDiv = document.createElement("div");
 
             cellDiv.classList.add("clickable-cell");
             cellDiv.dataset.date = date;
-            cellDiv.dataset.pracownikId = pracownik.IdOsoba;
+            cellDiv.dataset.pracownikId = pracownik.idosoba;
 
             cellDiv.addEventListener("click", toggleCell);
             cellDiv.addEventListener("mouseover", handleMouseOver);
 
             // Zamalowanie komórek na podstawie dni
-            if (groupedByPracownik[pracownik.IdOsoba]?.includes(date)) {
-                selectedDays[pracownik.IdOsoba].push(date);
+            if (groupedByPracownik[pracownik.idosoba]?.includes(date)) {
+                selectedDays[pracownik.idosoba].push(date);
                 cellDiv.dataset.selected = "true";
                 cellDiv.classList.add("selected");
             } else {
@@ -99,7 +98,7 @@ function generateTable(pracownicy) {
 
 
         console.log(selectedDays); // Debugowanie
-        console.log(dataForAll.ListaPracownikow);
+        console.log(dataForAll.listapracownikow);
     }
 
     // Obsługa przeciągania
@@ -182,8 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function populateDropdown() {
         pracownicyList.forEach(pracownik => {
             const pracownikDiv = document.createElement("div");
-            pracownikDiv.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
-            pracownikDiv.dataset.id = pracownik.IdOsoba;
+            pracownikDiv.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
+            pracownikDiv.dataset.id = pracownik.idosoba;
             pracownikDiv.style.backgroundColor = pracownik.kolor;
             pracownikDiv.style.color = getComplementaryColor(pracownik.kolor);
 
@@ -194,31 +193,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function addPracownik(pracownik) {
-        if (selectedPracownicy.some(p => p.IdOsoba === pracownik.IdOsoba)) {
+        if (selectedPracownicy.some(p => p.idosoba === pracownik.idosoba)) {
             alert("Ten pracownik już został dodany!");
             return;
         }
-        pracownik.Dzien = "0";
-        dataForAll.ListaPracownikow.push(pracownik);
+        pracownik.dzien = "0";
+        dataForAll.listapracownikow.push(pracownik);
         selectedPracownicy.push(pracownik);
         const pracownikItem = document.createElement("div");
         pracownikItem.className = "pracownik-item";
-        pracownikItem.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
+        pracownikItem.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
         pracownikItem.style.backgroundColor = pracownik.kolor;
         pracownikItem.style.color = getComplementaryColor(pracownik.kolor);
         const removeBtn = document.createElement("span");
         removeBtn.textContent = "x";
         removeBtn.addEventListener("click", () => {
             pracownicyContainer.removeChild(pracownikItem);
-            dataForAll.ListaPracownikow = dataForAll.ListaPracownikow.filter(p => p.IdOsoba !== pracownik.IdOsoba);
-            selectedPracownicy = selectedPracownicy.filter(p => p.IdOsoba !== pracownik.IdOsoba);
-            generateTable(dataForAll.ListaPracownikow);
+            dataForAll.listapracownikow = dataForAll.listapracownikow.filter(p => p.idosoba !== pracownik.idosoba);
+            selectedPracownicy = selectedPracownicy.filter(p => p.idosoba !== pracownik.idosoba);
+            generateTable(dataForAll.listapracownikow);
         });
         removeBtn.style.color = "black";
         pracownikItem.appendChild(removeBtn);
         pracownicyContainer.insertBefore(pracownikItem, addPracownikBtn);
         pracownicyDropdown.classList.remove('active');
-        generateTable(dataForAll.ListaPracownikow);
+        generateTable(dataForAll.listapracownikow);
 
     }
     function updateDropdownPosition() {
@@ -260,9 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 removeBtn.addEventListener("click", () => {
                     pracownicyContainer.removeChild(pracownikItem);
                     const pracownikId = pracownikItem.dataset.id;
-                    dataForAll.ListaPracownikow = dataForAll.ListaPracownikow.filter(p => p.IdOsoba !== pracownikId);
-                    selectedPracownicy = selectedPracownicy.filter(p => p.IdOsoba !== pracownikId);
-                    generateTable(dataForAll.ListaPracownikow);
+                    dataForAll.listapracownikow = dataForAll.listapracownikow.filter(p => p.idosoba !== pracownikId);
+                    selectedPracownicy = selectedPracownicy.filter(p => p.idosoba !== pracownikId);
+                    generateTable(dataForAll.listapracownikow);
                 });
                 pracownikItem.appendChild(removeBtn);
             }
@@ -286,11 +285,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchFirms() {
         try {
-            const response = await fetch("/RNZManagementTool/getAllFirms");
+            const response = await fetch("/getAllFirms");
             const firms = await response.json();
             firms.forEach(firm => {
                 const option = document.createElement('option');
-                option.value = firm.NazwaFirmy;
+                option.value = firm.nazwafirmy;
                 firmList.appendChild(option);
             });
         } catch (error) {
@@ -300,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchEventDetails(id) {
         try {
-            const response = await fetch(`/RNZManagementTool/getEvent?id=${id}`);
+            const response = await fetch(`/getEvent?id=${id}`);
             const data = await response.json();
 
             if (response.ok && data) {
@@ -316,40 +315,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function populateEventDetails(event) {
-        document.getElementById("nazwaWydarzenia").value = event.NazwaWydarzenia || "";
-        document.getElementById("firma").value = event.NazwaFirmy || "";
-        document.getElementById("miejsce").value = event.Miejsce || "";
-        document.getElementById("data-poczatek").value = event.DataPoczatek || "";
-        document.getElementById("data-koniec").value = event.DataKoniec || "";
-        document.getElementById("hotel").value = event.Hotel || "";
-        document.getElementById("osoba-zarzadzajaca").value = event.OsobaZarzadzajaca || "";
-        document.getElementById("komentarz").value = event.Komentarz || "";
+        document.getElementById("nazwaWydarzenia").value = event.nazwawydarzenia || "";
+        document.getElementById("firma").value = event.nazwafirmy || "";
+        document.getElementById("miejsce").value = event.miejsce || "";
+        document.getElementById("data-poczatek").value = event.datapoczatek || "";
+        document.getElementById("data-koniec").value = event.datakoniec || "";
+        document.getElementById("hotel").value = event.hotel || "";
+        document.getElementById("osoba-zarzadzajaca").value = event.osobazarzadzajaca || "";
+        document.getElementById("komentarz").value = event.komentarz || "";
 
         const pracownicyContainer = document.getElementById("pracownicy-container");
         pracownicyContainer.innerHTML = "";
         const uniquePracownicy = new Map();
-        event.ListaPracownikow.forEach(pracownik => {
-            if (!uniquePracownicy.has(pracownik.IdOsoba)) {
-                uniquePracownicy.set(pracownik.IdOsoba, pracownik);
+        console.log(event);
+        event.listapracownikow.forEach(pracownik => {
+            if (!uniquePracownicy.has(pracownik.idosoba)) {
+                uniquePracownicy.set(pracownik.idosoba, pracownik);
             }
         });
         uniquePracownicy.forEach(pracownik => {
             selectedPracownicy.push(pracownik);
             const pracownikElement = document.createElement("div");
-            pracownikElement.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
+            pracownikElement.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
             pracownikElement.className = "pracownik-item";
-            pracownikElement.dataset.id = pracownik.IdOsoba;
+            pracownikElement.dataset.id = pracownik.idosoba;
             pracownikElement.style.backgroundColor = pracownik.kolor;
             pracownikElement.style.color = getComplementaryColor(pracownik.kolor);
             pracownicyContainer.appendChild(pracownikElement);
         });
 
-        const dataPoczatekInput = document.getElementById("data-poczatek");
-        const dataKoniecInput = document.getElementById("data-koniec");
+        const datapoczatekInput = document.getElementById("data-poczatek");
+        const datakoniecInput = document.getElementById("data-koniec");
 
-        dataPoczatekInput.addEventListener("change", () => generateTable(event.ListaPracownikow));
-        dataKoniecInput.addEventListener("change", () => generateTable(event.ListaPracownikow));
-        generateTable(event.ListaPracownikow);
+        datapoczatekInput.addEventListener("change", () => generateTable(event.listapracownikow));
+        datakoniecInput.addEventListener("change", () => generateTable(event.listapracownikow));
+        generateTable(event.listapracownikow);
     }
 
     const editEventButton = document.getElementById("edit-event-btn");
@@ -367,12 +367,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const handleDeleteEvent = async () => {
         try {
-            const response = await fetch(`/RNZManagementTool/deleteEvent?id=${eventId}`, {
+            const response = await fetch(`/deleteEvent?id=${eventId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             });
             const result = await response.json();
-            alert(result.message || "Wydarzenie zostało zaktualizowane!");
+            alert(result.message || "Wydarzenie zostało usunięte!");
         } catch (error) {
             console.error("Błąd podczas aktualizacji wydarzenia:", error);
         }
@@ -398,22 +398,22 @@ document.getElementById("event-form").addEventListener("submit", async (event) =
     event.preventDefault();
     const formData = new FormData(event.target);
     const eventData = Object.fromEntries(formData.entries());
-    eventData.pracownicy = selectedPracownicy.map(p => p.IdOsoba);
+    eventData.pracownicy = selectedPracownicy.map(p => p.idosoba);
     eventData.dni = {};
     Object.keys(selectedDays).forEach(pracownikId => {
         eventData.dni[pracownikId] = selectedDays[pracownikId];
     });
-    console.log(eventData.dni);
+    console.log(eventData);
 
     try {
-        const response = await fetch(`/RNZManagementTool/updateEvent?id=${eventId}`, {
+        const response = await fetch(`/updateEvent?id=${eventId}`, {
             method: "POST",
             body: JSON.stringify(eventData),
             headers: { "Content-Type": "application/json" }
         });
 
         const result = await response.json();
-        alert(result.message || "Wydarzenie zostało zaktualizowane!");
+        alert(result.message);
     } catch (error) {
         console.error("Błąd podczas aktualizacji wydarzenia:", error);
     }

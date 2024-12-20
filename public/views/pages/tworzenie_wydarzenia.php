@@ -62,36 +62,30 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
         <main class="create-event-container">
             <h1>Utwórz nowe wydarzenie</h1>
             <form id="event-form">
-                <!-- NazwaWydarzenia -->
                 <div class="form-group">
                     <label for="nazwaWydarzenia">Nazwa Wydarzenia <span class="required">*</span></label>
                     <input type="text" id="nazwaWydarzenia" name="nazwaWydarzenia" placeholder="Podaj nazwe wydarzenia"
                         required>
                 </div>
 
-                <!-- Firma -->
                 <div class="form-group">
                     <label for="firma">Firma <span class="required">*</span></label>
                     <input type="text" id="firma" name="firma" placeholder="Wpisz nazwę firmy" list="firm-list"
                         required>
                     <datalist id="firm-list">
-                        <!-- Firmy zostaną załadowane dynamicznie -->
                     </datalist>
                 </div>
 
-                <!-- Miejsce -->
                 <div class="form-group">
                     <label for="miejsce">Miejsce <span class="required">*</span></label>
                     <input type="text" id="miejsce" name="miejsce" placeholder="Podaj miejsce wydarzenia" required>
                 </div>
 
-                <!-- Data Początek -->
                 <div class="form-group">
                     <label for="data-poczatek">Data Początek <span class="required">*</span></label>
-                    <input type="date" id="data-poczatek" name="data-poczatek" min="" required>
+                    <input type="date" id="data-poczatek" name="data-poczatek" required>
                 </div>
 
-                <!-- Data Koniec -->
                 <div class="form-group" id="data-koniec-container">
                     <label for="data-koniec">Data Koniec</label>
                     <input type="date" id="data-koniec" name="data-koniec">
@@ -102,43 +96,34 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
                     </label>
                 </div>
 
-                <!-- Pracownicy -->
                 <div class="form-group" id="pracownik_dropdown">
                     <label for="pracownicy">Pracownicy</label>
                     <div id="pracownicy-container">
-                        <!-- Wybrani pracownicy będą tutaj dynamicznie dodawani -->
                         <span id="add-pracownik-btn" class="add-btn">+</span>
                     </div>
                     <div id="pracownicy-dropdown" class="hidden">
-                        <!-- Lista pracowników zostanie załadowana dynamicznie -->
                     </div>
                 </div>
-                <!-- Przycisk generowania tabeli -->
                 <button type="button" id="generate-table-btn">Uzupełnij dni</button>
                 <div id="schedule-table-container">
                     <table id="schedule-table"></table>
                 </div>
 
-                <!-- Hotel -->
                 <div class="form-group">
                     <label for="hotel">Hotel</label>
                     <input type="text" id="hotel" name="hotel" placeholder="Podaj nazwę hotelu">
                 </div>
-
-                <!-- Osoba zarządzająca -->
                 <div class="form-group">
                     <label for="osoba-zarzadzajaca">Osoba zarządzająca</label>
                     <input type="text" id="osoba-zarzadzajaca" name="osoba-zarzadzajaca"
                         placeholder="Podaj imię i nazwisko">
                 </div>
 
-                <!-- Komentarz -->
                 <div class="form-group">
                     <label for="komentarz">Komentarz</label>
                     <textarea id="komentarz" name="komentarz" placeholder="Dodaj komentarz..."></textarea>
                 </div>
 
-                <!-- Przycisk wysyłania -->
                 <button type="submit" id="submit-btn">Utwórz wydarzenie</button>
             </form>
         </main>

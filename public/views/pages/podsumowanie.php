@@ -2,13 +2,13 @@
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /RNZManagementTool/');
+    header('Location: /');
     exit();
 }
 $user = $_SESSION['user'];
 
 if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status'] !== 'szef' ){
-    header('Location: /RNZManagementTool/public/views/main.php');
+    header('Location: /public/views/main.php');
     exit();
 }
 $user = $_SESSION['user'];
@@ -23,7 +23,7 @@ $user = $_SESSION['user'];
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../../css/podsumowanie.css">
-    <link rel="stylesheet" href="/RNZManagementTool/css/global.css">
+    <link rel="stylesheet" href="../../../css/global.css">
 </head>
 
 <body>
@@ -80,8 +80,8 @@ $user = $_SESSION['user'];
             </div>
         </main>
     </div>
-    <script src="/RNZManagementTool/js/podsumowanie.js"></script>
-    <script src="/RNZManagementTool/js/global.js"></script>
+    <script src="../../../js/podsumowanie.js"></script>
+    <script src="../../../js/global.js"></script>
 </body>
 
 </html>

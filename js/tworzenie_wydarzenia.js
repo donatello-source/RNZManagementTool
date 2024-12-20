@@ -17,11 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     datePoczatek.addEventListener("change", () => generateTable(selectedPracownicy));
     dateKoniec.addEventListener("change", () => generateTable(selectedPracownicy));
 
-    // Ustaw dzisiejszą datę jako minimalną
-    const today = new Date().toISOString().split('T')[0];
-    datePoczatek.min = today;
 
-    // Obsługa checkboxa "Wydarzenie jednodniowe"
     jednodnioweCheckbox.addEventListener('change', () => {
         if (jednodnioweCheckbox.checked) {
             dateKoniec.value = '';
@@ -31,14 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Pobierz firmy z bazy
     async function fetchFirms() {
         try {
-            const response = await fetch("/RNZManagementTool/getAllFirms");
+            const response = await fetch("/getAllFirms");
             const firms = await response.json();
             firms.forEach(firm => {
                 const option = document.createElement('option');
-                option.value = firm.NazwaFirmy;
+                option.value = firm.nazwafirmy;
                 firmList.appendChild(option);
             });
         } catch (error) {
@@ -48,16 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchPracownicy() {
         try {
-            const response = await fetch('/RNZManagementTool/getAllEmployees');
+            const response = await fetch('/getAllEmployees');
             const pracownicy = await response.json();
             pracownicyList = pracownicy;
             pracownicyDropdown.innerHTML = '';
             pracownicy.forEach(pracownik => {
                 const pracownikDiv = document.createElement('div');
-                pracownikDiv.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
-                pracownikDiv.style.backgroundColor = pracownik.kolor; // Ustaw kolor tła
-                pracownikDiv.style.color = getComplementaryColor(pracownik.kolor); // Ustaw kolor tła
-                pracownikDiv.dataset.id = pracownik.IdOsoba;
+                pracownikDiv.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
+                pracownikDiv.style.backgroundColor = pracownik.kolor;
+                pracownikDiv.style.color = getComplementaryColor(pracownik.kolor);
+                pracownikDiv.dataset.id = pracownik.idosoba;
 
                 pracownikDiv.addEventListener('click', () => {
                     addPracownikToList(pracownik);
@@ -70,18 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     function getComplementaryColor(color) {
-        // Tworzymy ukryty element do zamiany dowolnego formatu koloru na RGB
         const dummyDiv = document.createElement('div');
-        dummyDiv.style.color = color; // Ustawienie koloru
+        dummyDiv.style.color = color;
         document.body.appendChild(dummyDiv);
-        // Pobranie rzeczywistego koloru w formacie RGB
-        const computedColor = window.getComputedStyle(dummyDiv).color; // Wynik w 'rgb(r, g, b)'
-        document.body.removeChild(dummyDiv); // Usunięcie elementu po użyciu
-        // Wyciągnięcie składowych RGB
+        const computedColor = window.getComputedStyle(dummyDiv).color;
+        document.body.removeChild(dummyDiv);
         const rgbMatch = computedColor.match(/rgb\((\d+), (\d+), (\d+)\)/);
         if (!rgbMatch) {
             console.error('Nie można obliczyć koloru dla:', color);
-            return '#000000'; // Domyślny kolor: czarny
+            return '#000000';
         }
 
         const r = parseInt(rgbMatch[1]);
@@ -99,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addPracownikToList(pracownik) {
-        if (selectedPracownicy.some(p => p.IdOsoba === pracownik.IdOsoba)) {
+        if (selectedPracownicy.some(p => p.idosoba === pracownik.idosoba)) {
             alert('Ten pracownik został już dodany!');
 
             return;
@@ -109,14 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const pracownikItem = document.createElement('div');
         pracownikItem.classList.add('pracownik-item');
         pracownikItem.style.backgroundColor = pracownik.kolor;
-        pracownikItem.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
-        pracownikItem.dataset.id = pracownik.IdOsoba;
+        pracownikItem.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
+        pracownikItem.dataset.id = pracownik.idosoba;
 
         const removeBtn = document.createElement('span');
         removeBtn.textContent = 'x';
         removeBtn.addEventListener('click', () => {
             pracownicyContainer.removeChild(pracownikItem);
-            selectedPracownicy = selectedPracownicy.filter(p => p.IdOsoba !== pracownik.IdOsoba);
+            selectedPracownicy = selectedPracownicy.filter(p => p.idosoba !== pracownik.idosoba);
             generateTable(selectedPracownicy);
         });
         pracownikItem.style.color = getComplementaryColor(pracownik.kolor);
@@ -158,14 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const formData = new FormData(event.target);
         const eventData = Object.fromEntries(formData.entries());
-        eventData.pracownicy = selectedPracownicy.map(pracownik => pracownik.IdOsoba);
+        eventData.pracownicy = selectedPracownicy.map(pracownik => pracownik.idosoba);
         eventData.dni = {};
         Object.keys(selectedDays).forEach(pracownikId => {
-            eventData.dni[pracownikId] = selectedDays[pracownikId]; // Przypisz dni z selectedDays
+            eventData.dni[pracownikId] = selectedDays[pracownikId];
         });
         console.log(eventData);
         try {
-            const response = await fetch('/RNZManagementTool/addEvent', {
+            const response = await fetch('/addEvent', {
                 method: 'POST',
                 body: JSON.stringify(eventData),
                 headers: {
@@ -188,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableContainer = document.getElementById("schedule-table-container");
         const table = document.getElementById("schedule-table");
 
-        // Weryfikacja poprawności danych
         if (!startDateInput || !endDateInput) {
             return;
         }
@@ -197,54 +188,43 @@ document.addEventListener('DOMContentLoaded', () => {
         if (startDate > endDate) {
             return;
         }
-        // Pobranie wybranych pracowników
         if (selectedPracownicy.length === 0) {
             return;
         }
 
-        // Czyszczenie tabeli
         table.innerHTML = "";
 
-        // Nagłówek tabeli
         const headerRow = document.createElement("tr");
         headerRow.innerHTML = `<th>Pracownik</th>`;
 
         const dates = [];
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             const dayHeader = document.createElement("th");
-            const date = d.toISOString().split("T")[0]; // Data w formacie YYYY-MM-DD
+            const date = d.toISOString().split("T")[0];
             dates.push(date);
             dayHeader.textContent = date;
             headerRow.appendChild(dayHeader);
         }
         table.appendChild(headerRow);
 
-        // Tworzenie wierszy dla pracowników
         selectedPracownicy.forEach(pracownik => {
             const row = document.createElement("tr");
-
-            // Imię i nazwisko pracownika
             const nameCell = document.createElement("td");
-            nameCell.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
-            nameCell.style.backgroundColor = pracownik.kolor; // Kolor wiersza
+            nameCell.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
+            nameCell.style.backgroundColor = pracownik.kolor;
             nameCell.style.color = getComplementaryColor(pracownik.kolor);
             row.appendChild(nameCell);
 
-            // Inicjalizujemy dane pracownika
-            selectedDays[pracownik.IdOsoba] = [];
-
-            // Generowanie kolumn dla dni
+            selectedDays[pracownik.idosoba] = [];
             dates.forEach(date => {
                 const cell = document.createElement("td");
                 const cellDiv = document.createElement("div");
 
-                // Styl i klikalność komórek
                 cellDiv.classList.add("clickable-cell");
-                cellDiv.dataset.selected = "false"; // Stan zaznaczenia
+                cellDiv.dataset.selected = "false";
                 cellDiv.dataset.date = date;
-                cellDiv.dataset.pracownikId = pracownik.IdOsoba;
+                cellDiv.dataset.pracownikId = pracownik.idosoba;
 
-                // Dodajemy eventy
                 cellDiv.addEventListener("click", toggleCell);
                 cellDiv.addEventListener("mouseover", handleMouseOver);
 
@@ -255,10 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
             table.appendChild(row);
         });
 
-        // Zmienna do obsługi przeciągania
         let isMouseDown = false;
 
-        // Obsługa klikalnych komórek
         function toggleCell(event) {
             const cell = event.target;
             const pracownikId = cell.dataset.pracownikId;
@@ -268,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.dataset.selected = isSelected ? "false" : "true";
             cell.classList.toggle("selected", !isSelected);
 
-            // Aktualizujemy dane w selectedDays
             if (!isSelected) {
                 if (!selectedDays[pracownikId].includes(date)) {
                     selectedDays[pracownikId].push(date);
@@ -280,10 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            console.log(selectedDays); // Debugowanie
+            // console.log(selectedDays);
         }
 
-        // Obsługa przeciągania
         function handleMouseOver(event) {
             if (isMouseDown) {
                 const cell = event.target;
@@ -292,17 +268,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.dataset.selected = "true";
                 cell.classList.add("selected");
 
-                // Dodajemy do selectedDays, jeśli nie istnieje
                 if (!selectedDays[pracownikId].includes(date)) {
                     selectedDays[pracownikId].push(date);
                 }
             }
         }
-        // Obsługa zdarzeń myszy
         table.addEventListener("mousedown", () => (isMouseDown = true));
         document.addEventListener("mouseup", () => (isMouseDown = false));
 
-        // Pokazanie tabeli
         tableContainer.style.display = "block";
     };
 

@@ -49,7 +49,7 @@ function changeToCreateForm() {
 function changeToLoginForm() {
     loginContainer.innerHTML = `
         <div class="login-title">LOGOWANIE</div>
-        <form class="login-form" action="/RNZManagementTool/login" method="POST">
+        <form class="login-form" action="/login" method="POST">
             <div class="form-group">
                 <input type="email" name="email" id="email" placeholder=" " required>
                 <label for="email">Email</label>

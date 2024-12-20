@@ -2,14 +2,14 @@
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /RNZManagementTool/');
+    header('Location: /');
     exit();
 }
 
 $user = $_SESSION['user'];
 
 if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status'] !== 'szef' ){
-    header('Location: /RNZManagementTool/public/views/main.php');
+    header('Location: /public/views/main.php');
     exit();
 }
 ?>

@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /RNZManagementTool/');
+    header('Location: /');
     exit();
 }
 $user = $_SESSION['user'];

@@ -51,7 +51,7 @@
 .firm-phone,
 .firm-mail,
 .firm-address,
-.firm-NIP,
+.firm-nip,
 .firm-color {
     display: flex;
     flex-direction: column;

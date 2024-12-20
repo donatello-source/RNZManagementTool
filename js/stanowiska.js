@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         stanowiska.forEach(stanowisko => {
             const th = document.createElement("th");
-            th.textContent = stanowisko.NazwaStanowiska;
+            th.textContent = stanowisko.nazwastanowiska;
             thead.appendChild(th);
         });
 
@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const nameCell = document.createElement("td");
             const link = document.createElement("a");
             link.href =
-                `profil.php?id=${pracownik.IdOsoba}`;
-            link.textContent = `${pracownik.Imie} ${pracownik.Nazwisko}`;
+                `profil.php?id=${pracownik.idosoba}`;
+            link.textContent = `${pracownik.imie} ${pracownik.nazwisko}`;
             link.style.textDecoration = "none";
             link.style.color = "inherit";
             nameCell.appendChild(link);
@@ -43,12 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
             stanowiska.forEach(stanowisko => {
                 const cell = document.createElement("td");
                 cell.classList.add("clickable");
-                cell.dataset.idOsoba = pracownik.IdOsoba;
-                cell.dataset.idStanowiska = stanowisko.IdStanowiska;
+                cell.dataset.idosoba = pracownik.idosoba;
+                cell.dataset.idstanowiska = stanowisko.idstanowiska;
 
                 const isAssigned = powiazania.some(
-                    p => p.IdOsoba === pracownik.IdOsoba && p.IdStanowiska ===
-                        stanowisko.IdStanowiska
+                    p => p.idosoba === pracownik.idosoba && p.idstanowiska ===
+                        stanowisko.idstanowiska
                 );
 
                 if (isAssigned) {
@@ -73,8 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         cells.forEach(cell => {
             const powiazanie = {
-                IdOsoba: cell.dataset.idOsoba,
-                IdStanowiska: cell.dataset.idStanowiska,
+                idosoba: cell.dataset.idosoba,
+                idstanowiska: cell.dataset.idstanowiska,
             };
 
             if (cell.classList.contains("selected")) {

@@ -44,35 +44,46 @@ document.addEventListener('DOMContentLoaded', () => {
         let html = '<h2>Podsumowanie Firm</h2>';
 
         for (const [firmName, details] of Object.entries(firms)) {
-            html += `<div class="summary-card"><h3>${firmName} - Suma: ${details.suma.toFixed(2)} zł</h3>`;
+            html += `<div class="summary-card">
+                <h3>${firmName} - Suma: ${details.suma} zł</h3>`;
             details.wydarzenia.forEach(event => {
-                html += `<div>${event.nazwa} - ${event.suma.toFixed(2)} zł</div> `;
+                html += `<div>${event.nazwa} - ${event.suma} zł</div> `;
             });
             html += '</div>';
         }
         const totalSum = Object.values(firms).reduce((acc, firm) => acc + firm.suma, 0);
-        html += `<div class="total-summary">Podsumowanie: ${totalSum.toFixed(2)} zł</div>`;
+        html += `<div class="total-summary">Podsumowanie: ${totalSum} zł</div>`;
 
         return html;
     }
     function renderEvents(data) {
-        console.log(data.data);
+        const events = data.data;
+        console.log(events);
         let html = '<h2>Podsumowanie Wydarzeń</h2>';
-        for (const [event, details] of Object.entries(data.events)) {
-            html += `<h3>${event} (${details.data}) - Suma: ${details.suma} zł</h3>`;
+        for (const [eventName, details] of Object.entries(events)) {
+            html += `<div class="summary-card">
+                <h3>${eventName} (${details.data}) - Suma: ${details.suma} zł</h3>`;
             details.pracownicy.forEach(pracownik => {
                 html += `<div>${pracownik.pracownik} - ${pracownik.suma} zł</div>`;
             });
+
+            html += '</div>';
         }
+        const totalSum = Object.values(events).reduce((acc, event) => acc + event.suma, 0);
+        html += `<div class="total-summary">Łączna suma wydarzeń: ${totalSum} zł</div>`;
+
         return html;
     }
 
     function renderEmployees(data) {
+        let totalSum = 0;
+        const employees = data.data;
         let html = '<h2>Podsumowanie Pracowników</h2>';
-        data.employees.forEach(employee => {
-            html += `<div>${employee.pracownik} - ${employee.suma} zł</div>`;
+        employees.forEach(employee => {
+            html += `<div class="summary-card">${employee.pracownik} - ${employee.suma} zł</div>`;
+            totalSum += parseFloat(employee.suma);
         });
-        html += `<div><strong>Suma ogółem: ${data.summary} zł</strong></div>`;
+        html += `<div class="total-summary">Suma ogółem: ${totalSum} zł</div>`;
         return html;
     }
 });

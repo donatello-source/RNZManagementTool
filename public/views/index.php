@@ -7,7 +7,6 @@
     <title>Logowanie</title>
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -30,7 +29,7 @@
                 echo "<p style='color: red;'>$message</p>";
             }
             } ?>
-            <form class="login-form" action="/RNZManagementTool/login" method="POST">
+            <form class="login-form" action="/login" method="POST">
                 <div class="form-group">
                     <input type="email" name="email" id="email" placeholder=" " required>
                     <label for="email">Email</label>
@@ -48,6 +47,6 @@
         </div>
     </div>
 </body>
-<script src="/RNZManagementTool/js/index.js"></script>
+<script src="js/index.js"></script>
 
 </html>

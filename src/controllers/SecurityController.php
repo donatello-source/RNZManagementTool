@@ -2,6 +2,7 @@
 
 require_once 'AppController.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Database.php';
 
 class SecurityController extends AppController
 {
@@ -14,9 +15,10 @@ class SecurityController extends AppController
     {
         session_start();
         session_destroy();
-        header('Location: /RNZManagementTool/');
+        header('Location: /');
         exit();
     }
+
     public function login()
     {
         session_start();
@@ -24,39 +26,30 @@ class SecurityController extends AppController
             if (isset($_POST['email']) && isset($_POST['password'])) {
                 $email = $_POST['email'];
                 $password = $_POST['password'];
-                $mysqli = new mysqli('localhost', 'root', '', 'rnzmanago');
-                if ($mysqli->connect_error) {
-                    die("Błąd połączenia z bazą danych: " . $mysqli->connect_error);
-                }
-                $query = "SELECT * FROM osoby WHERE Email = ?";
-                $stmt = $mysqli->prepare($query);
-                $stmt->bind_param("s", $email);
-                $stmt->execute();
-                $result = $stmt->get_result();
 
-                if ($result->num_rows > 0) {
-                    $user = $result->fetch_assoc();
-                    if (password_verify($password, $user['Haslo']) && $user['Status'] != null) {
+                $user = User::getUserByEmail($email);
+                if ($user) {
+                    if (password_verify($password, $user['haslo']) && $user['status'] != "none") {
                         $_SESSION['user'] = [
-                            'id' => $user['IdOsoba'],
-                            'first_name' => $user['Imie'],
-                            'last_name' => $user['Nazwisko'],
-                            'email' => $user['Email'],
-                            'status' => $user['Status']
+                            'id' => $user['idosoba'],
+                            'first_name' => $user['imie'],
+                            'last_name' => $user['nazwisko'],
+                            'email' => $user['email'],
+                            'status' => $user['status']
                         ];
-                        header('Location: /RNZManagementTool/public/views/pages/main.php');
+                        header('Location: /public/views/pages/main.php');
                         exit();
                     } else {
-                        $messages[] = 'Niepoprawne dane logowania';
+                        $messages[] = "Konto nie zostało uwierzytelnione przez administratora";
                     }
                 } else {
                     $messages[] = 'Niepoprawne dane logowania';
                 }
-                $mysqli->close();
             } else {
                 $messages[] = 'Proszę wypełnić wszystkie pola';
             }
         }
         require_once 'public/views/index.php';
     }
+
 }

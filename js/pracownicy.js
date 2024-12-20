@@ -9,17 +9,16 @@ async function fetchEmployees() {
 }
 
 function displayEmployees(data) {
-    //console.log(data);
     const employeeContainer = document.getElementById('employee-container');
     if (employeeContainer) {
         employeeContainer.innerHTML = '';
         data.forEach(employee => {
             console.log(employee)
             employeeContainer.innerHTML += `
-            <div onclick="location.href='profil.php?id=${employee.IdOsoba}';" class="employee-card" style='background-color: ${employee.kolor}'>
-                <div class='employee-name'>${employee.Imie} ${employee.Nazwisko}</div>
+            <div onclick="location.href='profil.php?id=${employee.idosoba}';" class="employee-card" style='background-color: ${employee.kolor}'>
+                <div class='employee-name'>${employee.imie} ${employee.nazwisko}</div>
                 
-                <div class='employee-phone'>Numer telefonu: ${employee.NumerTelefonu}</div>
+                <div class='employee-phone'>Numer telefonu: ${employee.numertelefonu}</div>
             </div>
         `;
         });
