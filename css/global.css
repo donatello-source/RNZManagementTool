@@ -81,11 +81,16 @@ header {
 .menu-toggle {
     display: none;
     background: transparent;
-    border: none;
     font-size: 1.5em;
+    justify-content: center;
     color: white;
     cursor: pointer;
-    left: 20px;
+    border: none;
+    left: 5px;
+    background-color: #222222;
+    border-radius: 4px;
+    position: fixed;
+    top: 5px;
 }
 
 .sidebar nav ul {
@@ -118,9 +123,10 @@ header {
 
 @media (max-width: 720px) {
     .sidebar {
+        padding-top: 30px;
         position: absolute;
         width: 300px;
-        left: -190px;
+        left: -250px;
         top: 0;
         height: 100vh;
         transition: left 0.3s;
@@ -134,11 +140,8 @@ header {
     }
 
     .sidebar.active {
+        z-index: 999;
         left: 0px;
-    }
-
-    .container {
-        margin-left: 40px;
     }
 
     header {

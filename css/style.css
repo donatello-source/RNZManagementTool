@@ -50,7 +50,6 @@ header {
     color: #DB4F3D;
 }
 
-/* Styl głównego kontenera */
 .bodyLogin {
     background-color: #222222;
     color: #ffffff;
@@ -72,22 +71,17 @@ header {
     text-align: center;
 }
 
-/* Nagłówek logowania */
 .login-title {
     background-color: #ccc;
     color: black;
     font-weight: bold;
     padding: 8px 15px;
-    /* Zmniejszony padding */
     border-radius: 10px;
     font-size: 1.1em;
     margin: 0 auto 20px auto;
-    width: 100%;
-    /* Dopasowanie szerokości */
     max-width: 300px;
 }
 
-/* Formularz logowania */
 .login-form,
 .register-form {
     display: flex;
@@ -101,7 +95,6 @@ header {
     position: relative;
     margin: 25px 0;
     width: 100%;
-    /* Dopasowanie szerokości */
     max-width: 300px;
 }
 
@@ -131,7 +124,6 @@ header {
     transition: all 0.2s ease;
 }
 
-/* Przesuwanie etykiety nad polem */
 .form-group input:focus+label,
 .form-group input:not(:placeholder-shown)+label {
     top: -10px;
@@ -190,10 +182,9 @@ header {
     color: #DB4F3D;
 }
 
-/* Media Queries dla małych ekranów */
-@media (max-width: 400px) {
+@media (max-width: 720px) {
     .login-container {
-        width: 95%;
+        width: 85%;
         padding: 15px;
     }
 

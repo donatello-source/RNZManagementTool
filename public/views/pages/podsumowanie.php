@@ -55,7 +55,7 @@ $user = $_SESSION['user'];
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="podsumowanie.php" class="selected">Podsumowanie</a></li>
-                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <!-- <li><a href="ustawienia.php">Ustawienia</a></li> -->
                 </ul>
             </nav>
         </aside>

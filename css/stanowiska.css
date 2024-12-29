@@ -85,3 +85,13 @@
     border-radius: 8px;
     background-color: #363636;
 }
+
+@media (max-width: 720px) {
+    #position-container::-webkit-scrollbar {
+        width: 0px;
+    }
+
+    #position-container {
+        width: 95vw;
+    }
+}

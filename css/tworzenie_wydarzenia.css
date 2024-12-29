@@ -114,14 +114,12 @@ textarea {
     background-color: #45a049;
 }
 
-/* Stylizacja dla kontenera pracowników */
 #pracownicy-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
     position: relative;
-    /* Dodajemy pozycjonowanie kontenera */
 }
 
 .pracownik-item {
@@ -141,7 +139,6 @@ textarea {
     color: #fff;
 }
 
-/* Stylizacja przycisku "+" */
 .add-btn {
     display: inline-block;
     width: 30px;
@@ -162,8 +159,6 @@ textarea {
 
 #pracownicy-dropdown {
     position: absolute;
-    /* Pozycjonujemy absolutnie względem rodzica (pracownicy-container) */
-    /* Ustawiamy dropdown tuż poniżej "+" */
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -172,12 +167,10 @@ textarea {
     max-height: 200px;
     overflow-y: auto;
     display: none;
-    /* Domyślnie ukryty */
 }
 
 #pracownicy-dropdown.active {
     display: block;
-    /* Pokazujemy dropdown, gdy ma klasę .active */
 }
 
 #pracownicy-dropdown div {
@@ -191,8 +184,14 @@ textarea {
 }
 
 @media (max-width: 720px) {
-    .content {
-        height: 85vh;
+
+
+    .create-event-container::-webkit-scrollbar {
+        width: 0px;
+    }
+
+    .create-event-container {
+        width: 95vw;
     }
 }
 
@@ -224,5 +223,4 @@ textarea {
 
 .clickable-cell.selected {
     background-color: #ff0000;
-    /* Zielony dla zaznaczonego */
 }

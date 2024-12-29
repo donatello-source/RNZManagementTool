@@ -224,16 +224,12 @@
 }
 
 @media (max-width: 720px) {
-    .content {
-        height: 85vh;
-    }
-
-    .event-card {
+    .filters-panel {
         margin-left: 20px;
     }
 
-    .filters-panel {
-        padding-left: 40px;
+    .content::-webkit-scrollbar {
+        width: 0px;
     }
 
 }

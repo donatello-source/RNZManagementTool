@@ -240,6 +240,14 @@ textarea {
     .content {
         height: 85vh;
     }
+
+    .event-container::-webkit-scrollbar {
+        width: 0px;
+    }
+
+    .event-container {
+        width: 95vw;
+    }
 }
 
 #schedule-table-container {

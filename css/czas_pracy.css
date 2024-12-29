@@ -68,12 +68,11 @@ button.save-button:disabled {
 }
 
 @media (max-width: 720px) {
-    .content {
-        height: 85vh;
+    .work-day {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
     }
-
-    .event-card {
-        margin-left: 20px;
-    }
-
 }

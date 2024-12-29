@@ -35,17 +35,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             `).join('');
 
             workDays += `
-                <div class="work-day">
-                    <label>${day.dzien}</label>
-                    Obecność:
-                    <input type="checkbox" class="presence" ${day.stawkadzienna == 1 ? 'checked' : ''}>
-                    Stanowisko:
-                    <select disabled>
+            <div>${day.dzien}</div>
+            <div class="work-day">
+                Obecność:
+                <input type="checkbox" class="presence" ${day.stawkadzienna == 1 ? 'checked' : ''}>
+                Stanowisko:
+                <select disabled>
                     ${options}
-                    </select>
-                    nadgodziny:
-                    <input type="number" class="overtime" value="${day.nadgodziny || 0}" disabled>
-                </div>
+                </select>
+                nadgodziny:
+                <select class="overtime">
+                    ${Array.from({ length: 31 }, (_, i) => `<option value="${i}" ${day.nadgodziny == i ? 'selected' : ''}>${i}</option>`).join('')}
+                </select>
+            </div>
+
             `;
         });
 

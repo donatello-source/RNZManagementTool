@@ -1,4 +1,3 @@
-/* Sekcja główna */
 .content {
     flex: 1;
     background-color: #222222;
@@ -106,4 +105,10 @@
 #remove-profil-btn:hover {
     background-color: rgb(201, 1, 1);
 
+}
+
+@media (max-width: 720px) {
+    #firm-profile {
+        width: 95vw;
+    }
 }

@@ -56,12 +56,9 @@
 }
 
 @media (max-width: 720px) {
-    .content {
-        height: 85vh;
-    }
 
-    .firm-card {
-        margin-left: 20px;
-    }
 
+    .firm-list::-webkit-scrollbar {
+        width: 0px;
+    }
 }

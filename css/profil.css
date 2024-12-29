@@ -125,3 +125,13 @@
     background-color: rgb(201, 1, 1);
 
 }
+
+@media (max-width: 720px) {
+    #employee-profile::-webkit-scrollbar {
+        width: 0px;
+    }
+
+    #employee-profile {
+        width: 95vw;
+    }
+}

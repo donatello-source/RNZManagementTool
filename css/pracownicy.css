@@ -57,12 +57,7 @@
 
 
 @media (max-width: 720px) {
-    .content {
-        height: 85vh;
+    .employees-list::-webkit-scrollbar {
+        width: 0px;
     }
-
-    .employee-card {
-        margin-left: 20px;
-    }
-
 }

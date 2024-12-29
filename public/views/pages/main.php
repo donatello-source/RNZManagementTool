@@ -50,14 +50,14 @@ $user = $_SESSION['user'];
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="podsumowanie.php">Podsumowanie</a></li>
-                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <!-- <li><a href="ustawienia.php">Ustawienia</a></li> -->
                     <?php else: ?>
                     <li><a href="main.php" class="selected">Home</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
                     <li><a href="pracownicy.php">Pracownicy</a></li>
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
-                    <li><a href="ustawienia.php">Ustawienia</a></li>
+                    <!-- <li><a href="ustawienia.php">Ustawienia</a></li> -->
                     <?php endif; ?>
 
                 </ul>
