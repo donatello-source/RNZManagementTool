@@ -510,7 +510,8 @@ class EventRepository
                 $events[$eventName] = [
                     'data' => $row['datakoniec'],
                     'pracownicy' => [],
-                    'suma' => 0
+                    'dodatkowekoszta' => $row['dodatkowekoszta'],
+                    'suma' => $row['dodatkowekoszta']
                 ];
             }
     
@@ -518,7 +519,7 @@ class EventRepository
                 'pracownik' => $row['pracownik'],
                 'suma' => $row['sumapracownikow']
             ];
-            $events[$eventName]['suma'] += $row['sumapracownikow'] + $row['dodatkowekoszta'];
+            $events[$eventName]['suma'] += $row['sumapracownikow'];
         }
     
         return $events;

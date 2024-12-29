@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function renderEvents(data) {
         const events = data.data;
-        console.log(events);
+        console.log(data);
         let html = '<h2>Podsumowanie Wydarzeń</h2>';
         for (const [eventName, details] of Object.entries(events)) {
             html += `<div class="summary-card">
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             details.pracownicy.forEach(pracownik => {
                 html += `<div>${pracownik.pracownik} - ${pracownik.suma} zł</div>`;
             });
-
+            html += `<div>Dodatkowe koszta - ${details.dodatkowekoszta} zł</div>`;
             html += '</div>';
         }
         const totalSum = Object.values(events).reduce((acc, event) => acc + event.suma, 0);
