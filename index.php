@@ -24,6 +24,8 @@ Router::get('getDetailedEvents', 'MainController');
 Router::get('getAllEmployees', 'MainController');
 Router::get('getAllDetailedEmployees', 'MainController');
 Router::get('getEmployee', 'MainController');
+Router::get('getEmployeeProfile', 'MainController');
+Router::post('updateEmployeeProfile', 'MainController');
 Router::get('getEmployeeEvents', 'MainController');
 Router::get('getEmployeePositions', 'MainController');
 Router::get('getEmployeesPositions', 'MainController');

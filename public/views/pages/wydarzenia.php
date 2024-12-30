@@ -29,7 +29,7 @@ $user = $_SESSION['user'];
             <div>Nie ma problemów, są tylko wyzwania do rozwiązania</div>
         </div>
         <div class="profile-link">
-            <a href="profile.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
+            <a href="ustawienia.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
             <div id="userStatus" hidden><?= $user['status'] ?></div>
         </div>
         <form class="logout" action="/RNZManagementTool/logout" method="POST">
@@ -50,20 +50,22 @@ $user = $_SESSION['user'];
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="podsumowanie.php">Podsumowanie</a></li>
-                    <!-- <li><a href="ustawienia.php">Ustawienia</a></li> -->
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
                     <?php else: ?>
                     <li><a href="main.php">Home</a></li>
                     <li><a href="wydarzenia.php" class="selected">Wydarzenia</a></li>
                     <li><a href="pracownicy.php">Pracownicy</a></li>
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
-                    <!-- <li><a href="ustawienia.php">Ustawienia</a></li> -->
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
                     <?php endif; ?>
                 </ul>
             </nav>
         </aside>
         <main class="content">
+            <?php if ($user['status'] === 'szef' || $user['status'] === 'administrator'): ?>
             <div class="create_event" onclick="location.href='../pages/tworzenie_wydarzenia.php'">+</div>
+            <?php endif; ?>
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Wyszukaj wydarzenie..." />
                 <button id="filter-button"><img src="https://cdn-icons-png.flaticon.com/512/107/107799.png"

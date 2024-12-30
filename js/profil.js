@@ -59,6 +59,7 @@ function getComplementaryColor(color) {
 
 
 function displayEmployeeProfile(employee) {
+    console.log(employee)
     const profileContainer = document.getElementById('employee-profile');
     if (profileContainer) {
         const complementaryColor = getComplementaryColor(employee.kolor);
@@ -84,6 +85,10 @@ function displayEmployeeProfile(employee) {
         <div class="profil-state">
             <label for="employee-position">Status:</label>
             <input type="text" id="employee-position" value="${employee.status}" readonly>
+        </div>
+        <div class="profil-color">
+            <label for="employee-position">Kolor:</label>
+            <input type="text" id="employee-color" value="${employee.kolor}" readonly>
         </div>
     `;
 
@@ -175,6 +180,7 @@ const handleSaveProfile = async () => {
         email: document.getElementById("employee-mail").value,
         adreszamieszkania: document.getElementById("employee-address").value,
         status: document.getElementById("employee-position").value,
+        kolor: document.getElementById("employee-color").value,
         stanowiska: [],
     };
 
@@ -184,7 +190,7 @@ const handleSaveProfile = async () => {
             stawka: input.value,
         });
     });
-
+    //console.log(updatedData)
     try {
         const response = await fetch(`/updateEmployee?id=${employeeId}`, {
             method: "POST",

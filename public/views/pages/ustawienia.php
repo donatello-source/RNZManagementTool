@@ -17,7 +17,7 @@ $user = $_SESSION['user'];
     <link href='https://fonts.googleapis.com/css?family=Playfair Display' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../../css/global.css">
-    <link rel="stylesheet" href="../../../css/ustawienia.css">
+    <link rel="stylesheet" href="../../../css/profil.css">
 </head>
 
 <body>
@@ -29,7 +29,7 @@ $user = $_SESSION['user'];
             <div>Nie ma problemów, są tylko wyzwania do rozwiązania</div>
         </div>
         <div class="profile-link">
-            <a href="profile.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
+            <a href="ustawienia.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
             <div id="userStatus" hidden><?= $user['status'] ?></div>
         </div>
         <form class="logout" action="/RNZManagementTool/logout" method="POST">
@@ -37,8 +37,8 @@ $user = $_SESSION['user'];
         </form>
     </header>
     <div class="container">
-        <button class="menu-toggle">☰</button>
         <aside class="sidebar">
+            <button class="menu-toggle">☰</button>
             <nav>
                 <ul>
                     <?php if ($_SESSION['user']['status'] === 'administrator' || $_SESSION['user']['status'] === 'szef' ): ?>
@@ -50,22 +50,22 @@ $user = $_SESSION['user'];
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="podsumowanie.php">Podsumowanie</a></li>
-                    <!-- <li><a href="ustawienia.php" class="selected">Ustawienia</a></li> -->
+                    <li><a href="ustawienia.php" class="selected">Ustawienia</a></li>
                     <?php else: ?>
                     <li><a href="main.php">Home</a></li>
                     <li><a href="wydarzenia.php">Wydarzenia</a></li>
                     <li><a href="pracownicy.php">Pracownicy</a></li>
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
-                    <!-- <li><a href="ustawienia.php" class="selected">Ustawienia</a></li> -->
+                    <li><a href="ustawienia.php" class="selected">Ustawienia</a></li>
                     <?php endif; ?>
                 </ul>
             </nav>
         </aside>
-        <main class="content">
-
-        </main>
+        <form id="employee-profile">
+        </form>
     </div>
+    <script src="../../../js/ustawienia.js"></script>
     <script src="../../../js/global.js"></script>
 </body>
 

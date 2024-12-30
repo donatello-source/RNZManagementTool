@@ -35,7 +35,7 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
             <div>Nie ma problemów, są tylko wyzwania do rozwiązania</div>
         </div>
         <div class="profile-link">
-            <a href="profile.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
+            <a href="ustawienia.php"><?= $user['first_name'] . ' ' . $user['last_name'] ?></a>
             <div id="userStatus" hidden><?= $user['status'] ?></div>
         </div>
         <form class="logout" action="/RNZManagementTool/logout" method="POST">
@@ -55,7 +55,7 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
                     <li><a href="czas_pracy.php">Czas Pracy</a></li>
                     <li><a href="wyplaty.php">Wypłaty</a></li>
                     <li><a href="podsumowanie.php">Podsumowanie</a></li>
-                    <!-- <li><a href="ustawienia.php">Ustawienia</a></li> -->
+                    <li><a href="ustawienia.php">Ustawienia</a></li>
                 </ul>
             </nav>
         </aside>

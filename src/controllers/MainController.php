@@ -153,6 +153,58 @@ class MainController extends AppController
         }
         echo json_encode($events);
     }
+
+    public function getEmployeeProfile()
+    {
+        session_start();
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['error' => 'Sesja nie istnieje lub brak użytkownika']);
+            exit;
+        }
+    
+        $employeeId = $_SESSION['user']['id'];
+        $employeeRepository = new EmployeeRepository();
+        $employeeProfile = $employeeRepository->getEmployeeProfile($employeeId);
+    
+        if (!$employeeProfile) {
+            echo json_encode(['error' => 'Profil pracownika nie został znaleziony']);
+            return;
+        }
+        echo json_encode($employeeProfile);
+    }
+    
+    public function updateEmployeeProfile()
+    {
+        session_start();
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['error' => 'Sesja nie istnieje lub brak użytkownika']);
+            exit;
+        }
+    
+        $employeeId = $_SESSION['user']['id'];
+        $data = json_decode(file_get_contents('php://input'), true);
+    
+        if (!$data) {
+            echo json_encode(['error' => 'Nieprawidłowe dane wejściowe']);
+            exit;
+        }
+    
+        $employeeRepository = new EmployeeRepository();
+    
+        try {
+            $success = $employeeRepository->updateEmployeeProfile($employeeId, $data);
+    
+            if ($success) {
+                echo json_encode(['message' => 'Profil został zaktualizowany']);
+            } else {
+                echo json_encode(['error' => 'Aktualizacja nie powiodła się']);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+    
+
     public function getEmployeePositions()
     {
         session_start();
@@ -395,6 +447,8 @@ class MainController extends AppController
             'summary' => number_format(array_sum(array_column($payouts, 'suma')), 2)
         ]);
     }
+
+
     public function getSummary(): void
     {
         session_start();

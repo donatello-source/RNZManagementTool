@@ -402,7 +402,7 @@ class EmployeeRepository
 
     public function updateEmployee(int $employeeId, array $data): bool
     {
-        $requiredFields = ['imie', 'nazwisko', 'numertelefonu', 'email', 'adreszamieszkania', 'stanowiska'];
+        $requiredFields = ['imie', 'nazwisko', 'numertelefonu', 'email', 'adreszamieszkania', 'stanowiska', 'kolor'];
 
         foreach ($requiredFields as $field) {
             if (!isset($data[$field])) {
@@ -416,6 +416,7 @@ class EmployeeRepository
         $email = $data['email'];
         $adres = $data['adreszamieszkania'];
         $stanowiska = $data['stanowiska'];
+        $kolor = $data['kolor'];
 
         $checkQuery = "SELECT * FROM osoby WHERE idosoba = :employeeId";
         $stmt = $this->connection->prepare($checkQuery);
@@ -433,7 +434,8 @@ class EmployeeRepository
                 nazwisko = :nazwisko, 
                 numertelefonu = :telefon, 
                 email = :email, 
-                adreszamieszkania = :adres 
+                adreszamieszkania = :adres, 
+                kolor = :kolor
             WHERE idosoba = :employeeId
         ";
         $stmt = $this->connection->prepare($updateQuery);
@@ -442,6 +444,7 @@ class EmployeeRepository
         $stmt->bindParam(':telefon', $telefon, PDO::PARAM_STR);
         $stmt->bindParam(':email', $email, PDO::PARAM_STR);
         $stmt->bindParam(':adres', $adres, PDO::PARAM_STR);
+        $stmt->bindParam(':kolor', $kolor, PDO::PARAM_STR);
         $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
 
         if (!$stmt->execute()) {
@@ -470,7 +473,90 @@ class EmployeeRepository
         return true;
     }
 
+    public function getEmployeeProfile(int $employeeId): array
+    {
+        $query = "
+            SELECT 
+                o.imie, 
+                o.nazwisko, 
+                o.numertelefonu, 
+                o.email, 
+                o.adreszamieszkania, 
+                o.kolor
+            FROM osoby o
+            WHERE o.idosoba = :employeeId
+        ";
+    
+        $stmt = $this->connection->prepare($query);
+        if (!$stmt) {
+            return ['message' => 'Błąd podczas przygotowywania zapytania'];
+        }
+    
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if (!$result) {
+            return ['message' => 'Pracownik nie znaleziony'];
+        }
+    
+        return [
+            'imie' => $result['imie'],
+            'nazwisko' => $result['nazwisko'],
+            'numertelefonu' => $result['numertelefonu'],
+            'email' => $result['email'],
+            'adreszamieszkania' => $result['adreszamieszkania'],
+            'kolor' => $result['kolor'],
+        ];
+    }
 
+    
+    public function updateEmployeeProfile(int $employeeId, array $data): bool
+    {
+        $requiredFields = ['imie', 'nazwisko', 'numertelefonu', 'email', 'adreszamieszkania', 'kolor'];
+    
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                throw new Exception("Pole $field jest wymagane");
+            }
+        }
+    
+        $imie = $data['imie'];
+        $nazwisko = $data['nazwisko'];
+        $telefon = $data['numertelefonu'];
+        $email = $data['email'];
+        $adres = $data['adreszamieszkania'];
+        $kolor = $data['kolor'];
+    
+        $updateQuery = "
+            UPDATE osoby 
+            SET 
+                imie = :imie, 
+                nazwisko = :nazwisko, 
+                numertelefonu = :telefon, 
+                email = :email, 
+                adreszamieszkania = :adres, 
+                kolor = :kolor
+            WHERE idosoba = :employeeId
+        ";
+    
+        $stmt = $this->connection->prepare($updateQuery);
+        $stmt->bindParam(':imie', $imie, PDO::PARAM_STR);
+        $stmt->bindParam(':nazwisko', $nazwisko, PDO::PARAM_STR);
+        $stmt->bindParam(':telefon', $telefon, PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->bindParam(':adres', $adres, PDO::PARAM_STR);
+        $stmt->bindParam(':kolor', $kolor, PDO::PARAM_STR);
+        $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
+    
+        if (!$stmt->execute()) {
+            throw new Exception("Błąd podczas aktualizacji profilu: " . implode(", ", $stmt->errorInfo()));
+        }
+    
+        return true;
+    }
+    
     
     public function getEmployeesSummary(int $month, int $year): array
     {
@@ -479,7 +565,7 @@ class EmployeeRepository
             CONCAT(o.imie, ' ', o.nazwisko) AS pracownik,
             SUM(
                 CASE 
-                    WHEN wp.stawkadzienna = true THEN (so.stawka * 12 + wp.nadgodziny * so.stawka * 1.25)
+                    WHEN wp.stawkadzienna = true THEN (so.stawka + wp.nadgodziny * so.stawka * 0.1)
                     ELSE 0
                 END
             ) AS suma

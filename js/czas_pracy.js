@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `).join('');
 
             workDays += `
-            <div>${day.dzien}</div>
+            <label>${day.dzien}</label>
             <div class="work-day">
                 Obecność:
                 <input type="checkbox" class="presence" ${day.stawkadzienna == 1 ? 'checked' : ''}>
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${options}
                 </select>
                 nadgodziny:
-                <select class="overtime">
+                <select class="overtime" disabled>
                     ${Array.from({ length: 31 }, (_, i) => `<option value="${i}" ${day.nadgodziny == i ? 'selected' : ''}>${i}</option>`).join('')}
                 </select>
             </div>
@@ -80,14 +80,16 @@ function addEventListeners() {
                 const select = day.querySelector('select');
                 const overtimeInput = day.querySelector('.overtime');
 
+                const label = day.previousElementSibling;
+                const dzien = label ? label.textContent : null;
+
                 return {
                     obecność: checkbox.checked ? 1 : 0,
-                    dzień: day.querySelector('label').textContent,
+                    dzień: dzien,
                     idstanowiska: checkbox.checked ? parseInt(select.value, 10) : null,
                     nadgodziny: checkbox.checked ? parseInt(overtimeInput.value, 10) || 0 : 0,
                 };
             });
-
             const payload = {
                 idWydarzenia: eventId,
                 dniPracy: workDays,

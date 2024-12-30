@@ -137,7 +137,7 @@ class FirmRepository
             w.nazwawydarzenia,
             SUM(
                 CASE 
-                    WHEN wp.stawkadzienna = true THEN (so.stawka * 12 + wp.nadgodziny * so.stawka * 1.25)
+                    WHEN wp.stawkadzienna = true THEN (so.stawka + wp.nadgodziny * so.stawka * 0.1)
                     ELSE 0
                 END
             ) AS sumapracownikow,

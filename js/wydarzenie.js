@@ -2,6 +2,7 @@ let dataForAll = {};
 let selectedPracownicy = [];
 const selectedDays = {};
 let checker = 0;
+let isBoss = false;
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
@@ -19,7 +20,6 @@ function generateTable(pracownicy) {
     const startDate = new Date(startDateInput);
     const endDate = new Date(endDateInput);
 
-    // Nagłówek tabeli
     const headerRow = document.createElement("tr");
     headerRow.innerHTML = `<th>Pracownik</th>`;
     const dates = [];
@@ -57,7 +57,6 @@ function generateTable(pracownicy) {
             cellDiv.addEventListener("click", toggleCell);
             cellDiv.addEventListener("mouseover", handleMouseOver);
 
-            // Zamalowanie komórek na podstawie dni
             if (groupedByPracownik[pracownik.idosoba]?.includes(date)) {
                 selectedDays[pracownik.idosoba].push(date);
                 cellDiv.dataset.selected = "true";
@@ -72,10 +71,8 @@ function generateTable(pracownicy) {
 
         table.appendChild(row);
     });
-    // Zmienna do obsługi przeciągania
     let isMouseDown = false;
 
-    // Obsługa klikalnych komórek
     function toggleCell(event) {
         const cell = event.target;
         const { pracownikId, date } = cell.dataset;
@@ -84,7 +81,6 @@ function generateTable(pracownicy) {
         cell.dataset.selected = isSelected ? "false" : "true";
         cell.classList.toggle("selected", !isSelected);
 
-        // Aktualizujemy dane w selectedDays
         if (!isSelected) {
             if (!selectedDays[pracownikId].includes(date)) {
                 selectedDays[pracownikId].push(date);
@@ -97,11 +93,10 @@ function generateTable(pracownicy) {
         }
 
 
-        console.log(selectedDays); // Debugowanie
-        console.log(dataForAll.listapracownikow);
+        //console.log(selectedDays); // Debugowanie
+        //console.log(dataForAll.listapracownikow);
     }
 
-    // Obsługa przeciągania
     function handleMouseOver(event) {
         if (isMouseDown) {
             const cell = event.target;
@@ -110,13 +105,11 @@ function generateTable(pracownicy) {
             cell.dataset.selected = "true";
             cell.classList.add("selected");
 
-            // Dodajemy do selectedDays, jeśli nie istnieje
             if (!selectedDays[pracownikId].includes(date)) {
                 selectedDays[pracownikId].push(date);
             }
         }
     }
-    // Obsługa zdarzeń myszy
     table.addEventListener("mousedown", () => (isMouseDown = true));
     document.addEventListener("mouseup", () => (isMouseDown = false));
 
@@ -327,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const pracownicyContainer = document.getElementById("pracownicy-container");
         pracownicyContainer.innerHTML = "";
         const uniquePracownicy = new Map();
-        console.log(event);
+        //console.log(event);
         event.listapracownikow.forEach(pracownik => {
             if (!uniquePracownicy.has(pracownik.idosoba)) {
                 uniquePracownicy.set(pracownik.idosoba, pracownik);
@@ -353,6 +346,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const editEventButton = document.getElementById("edit-event-btn");
+    if (editEventButton) {
+        isBoss = true;
+    }
     const handleEditEvent = () => {
         enableFormEditing();
         editEventButton.textContent = "Zapisz";
@@ -379,8 +375,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
 
-    editEventButton.addEventListener("click", handleEditEvent);
-
+    if (isBoss) {
+        editEventButton.addEventListener("click", handleEditEvent);
+    }
 
     if (eventId) {
         fetchEventDetails(eventId);
@@ -403,7 +400,7 @@ document.getElementById("event-form").addEventListener("submit", async (event) =
     Object.keys(selectedDays).forEach(pracownikId => {
         eventData.dni[pracownikId] = selectedDays[pracownikId];
     });
-    console.log(eventData);
+    //console.log(eventData);
 
     try {
         const response = await fetch(`/updateEvent?id=${eventId}`, {

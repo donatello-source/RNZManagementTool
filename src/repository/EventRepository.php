@@ -444,9 +444,9 @@ class EventRepository
     
             $stawka = $row['stawkagodzinowa'];
             $nadgodziny = $row['nadgodziny'];
-            $stawkanadgodziny = $stawka * 1.25;
+            $stawkanadgodziny = $stawka * 0.1;
     
-            $zarobekdzien = ($stawka * 12) + ($stawkanadgodziny * $nadgodziny);
+            $zarobekdzien = ($stawka) + ($stawkanadgodziny * $nadgodziny);
             $events[$eventId]['dni'][] = [
                 'dzien' => $row['dzien'],
                 'stanowisko' => $row['idstanowiska'],
@@ -471,7 +471,7 @@ class EventRepository
             CONCAT(o.imie, ' ', o.nazwisko) AS pracownik,
             SUM(
                 CASE 
-                    WHEN wp.stawkadzienna = true THEN (so.stawka * 12 + wp.nadgodziny * so.stawka * 1.25)
+                    WHEN wp.stawkadzienna = true THEN (so.stawka + wp.nadgodziny * so.stawka * 0.1)
                     ELSE 0
                 END
             ) AS sumapracownikow,
