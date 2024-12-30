@@ -11,7 +11,7 @@ class FirmRepository
     public function getAllFirms(): array
     {
         $query = "
-            SELECT idfirma, nazwafirmy, adresfirmy, nip, telefon
+            SELECT idfirma, nazwafirmy, adresfirmy, nip, telefon, kolor
             FROM firma
         ";
 
@@ -31,7 +31,8 @@ class FirmRepository
                 'nazwafirmy' => $row['nazwafirmy'],
                 'adresfirmy' => $row['adresfirmy'],
                 'nip' => $row['nip'],
-                'telefon' => $row['telefon']
+                'telefon' => $row['telefon'],
+                'kolor' => $row['kolor']
             ];
         }, $firms);
     }
