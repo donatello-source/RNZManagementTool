@@ -92,7 +92,7 @@ class EventRepository
     public function getEvent(int $eventId): array
     {
         $query = "
-            SELECT w.idwydarzenia, w.nazwawydarzenia, w.idfirma, w.datapoczatek, w.datakoniec, w.miejsce, w.komentarz, f.nazwafirmy, w.hotel, w.osobazarzadzajaca
+            SELECT w.idwydarzenia, w.nazwawydarzenia, w.idfirma, w.datapoczatek, w.datakoniec, w.miejsce, w.komentarz, f.nazwafirmy, w.hotel, w.osobazarzadzajaca, w.dodatkowekoszta
             FROM wydarzenia w
             JOIN firma f ON w.idfirma = f.idfirma
             WHERE w.idwydarzenia = ?
@@ -142,6 +142,7 @@ class EventRepository
         $datapoczatek = $data['data-poczatek'];
         $datakoniec = $data['data-koniec'] ?? $datapoczatek;
         $komentarz = $data['komentarz'] ?? '';
+        $dodatkowekoszta = $data['dodatkowe-koszta'] ?? '';
         $pracownicy = $data['pracownicy'] ?? [];
     
         $query = "SELECT * FROM wydarzenia WHERE idwydarzenia = :eventId";
@@ -170,7 +171,8 @@ class EventRepository
                             datakoniec = :datakoniec, 
                             komentarz = :komentarz,
                             hotel = :hotel,
-                            osobazarzadzajaca = :osobazarzadzajaca
+                            osobazarzadzajaca = :osobazarzadzajaca,
+                            dodatkowekoszta = :dodatkowekoszta
                         WHERE idwydarzenia = :eventId";
     
         $stmt = $this->connection->prepare($queryUpdate);
@@ -182,6 +184,7 @@ class EventRepository
         $stmt->bindParam(':komentarz', $komentarz, PDO::PARAM_STR);
         $stmt->bindParam(':hotel', $hotel, PDO::PARAM_STR);
         $stmt->bindParam(':osobazarzadzajaca', $osobazarzadzajaca, PDO::PARAM_STR);
+        $stmt->bindParam(':dodatkowekoszta', $dodatkowekoszta, PDO::PARAM_STR);
         $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
         
         if (!$stmt->execute()) {
@@ -242,6 +245,7 @@ class EventRepository
             $komentarz = $eventData['komentarz'] ?? '';
             $hotel = $eventData['hotel'] ?? '';
             $osobazarzadzajaca = $eventData['osoba-zarzadzajaca'] ?? '';
+            $dodatkowekoszta = $eventData['dodatkowe-koszta'] ?? '';
             $pracownicy = $eventData['pracownicy'] ?? [];
     
             $stmt = $this->connection->prepare("SELECT idfirma FROM firma WHERE nazwafirmy = :firma");
@@ -260,8 +264,8 @@ class EventRepository
             $idfirma = $result['idfirma'];
     
             $stmt = $this->connection->prepare("
-                INSERT INTO wydarzenia (idfirma, nazwawydarzenia, miejsce, datapoczatek, datakoniec, komentarz, hotel, osobazarzadzajaca)
-                VALUES (:idfirma, :nazwawydarzenia, :miejsce, :datapoczatek, :datakoniec, :komentarz, :hotel, :osobazarzadzajaca)
+                INSERT INTO wydarzenia (idfirma, nazwawydarzenia, miejsce, datapoczatek, datakoniec, komentarz, hotel, osobazarzadzajaca, dodatkowekoszta)
+                VALUES (:idfirma, :nazwawydarzenia, :miejsce, :datapoczatek, :datakoniec, :komentarz, :hotel, :osobazarzadzajaca, :dodatkowekoszta)
             ");
             if (!$stmt) {
                 throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
@@ -275,6 +279,7 @@ class EventRepository
             $stmt->bindParam(':komentarz', $komentarz, PDO::PARAM_STR);
             $stmt->bindParam(':hotel', $hotel, PDO::PARAM_STR);
             $stmt->bindParam(':osobazarzadzajaca', $osobazarzadzajaca, PDO::PARAM_STR);
+            $stmt->bindParam(':dodatkowekoszta', $dodatkowekoszta, PDO::PARAM_STR);
             
             if (!$stmt->execute()) {
                 throw new Exception("Błąd podczas dodawania wydarzenia: " . $stmt->errorInfo());

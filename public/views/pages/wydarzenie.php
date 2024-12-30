@@ -118,11 +118,15 @@ $user = $_SESSION['user'];
                 </div>
 
                 <?php if ($user['status'] === 'szef' || $user['status'] === 'administrator'): ?>
+                <div class="form-group">
+                    <label for="dodatkowe-koszta">Dodatkowe koszta</label>
+                    <input type="number" id="dodatkowe-koszta" name="dodatkowe-koszta" disabled>
+                </div>
+
                 <button type="button" id="edit-event-btn">Edytuj wydarzenie</button>
                 <?php endif; ?>
             </form>
         </main>
-
     </div>
     <script src="../../../js/wydarzenie.js"></script>
     <script src="../../../js/global.js"></script>

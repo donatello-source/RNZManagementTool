@@ -123,7 +123,12 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
                     <label for="komentarz">Komentarz</label>
                     <textarea id="komentarz" name="komentarz" placeholder="Dodaj komentarz..."></textarea>
                 </div>
-
+                <?php if ($user['status'] === 'szef' || $user['status'] === 'administrator'): ?>
+                <div class="form-group">
+                    <label for="dodatkowe-koszta">Dodatkowe koszta</label>
+                    <input type="number" id="dodatkowe-koszta" name="dodatkowe-koszta">
+                </div>
+                <?php endif; ?>
                 <button type="submit" id="submit-btn">Utwórz wydarzenie</button>
             </form>
         </main>

@@ -316,6 +316,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("hotel").value = event.hotel || "";
         document.getElementById("osoba-zarzadzajaca").value = event.osobazarzadzajaca || "";
         document.getElementById("komentarz").value = event.komentarz || "";
+        if (isBoss) {
+            document.getElementById("dodatkowe-koszta").value = event.dodatkowekoszta || "";
+        }
 
         const pracownicyContainer = document.getElementById("pracownicy-container");
         pracownicyContainer.innerHTML = "";
@@ -400,7 +403,7 @@ document.getElementById("event-form").addEventListener("submit", async (event) =
     Object.keys(selectedDays).forEach(pracownikId => {
         eventData.dni[pracownikId] = selectedDays[pracownikId];
     });
-    //console.log(eventData);
+    console.log(eventData);
 
     try {
         const response = await fetch(`/updateEvent?id=${eventId}`, {
