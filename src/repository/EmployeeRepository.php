@@ -402,7 +402,7 @@ class EmployeeRepository
 
     public function updateEmployee(int $employeeId, array $data): bool
     {
-        $requiredFields = ['imie', 'nazwisko', 'numertelefonu', 'email', 'adreszamieszkania', 'stanowiska', 'kolor'];
+        $requiredFields = ['imie', 'nazwisko', 'numertelefonu', 'email', 'adreszamieszkania', 'stanowiska', 'kolor', 'status'];
 
         foreach ($requiredFields as $field) {
             if (!isset($data[$field])) {
@@ -417,6 +417,7 @@ class EmployeeRepository
         $adres = $data['adreszamieszkania'];
         $stanowiska = $data['stanowiska'];
         $kolor = $data['kolor'];
+        $status = $data['status'];
 
         $checkQuery = "SELECT * FROM osoby WHERE idosoba = :employeeId";
         $stmt = $this->connection->prepare($checkQuery);
@@ -435,7 +436,8 @@ class EmployeeRepository
                 numertelefonu = :telefon, 
                 email = :email, 
                 adreszamieszkania = :adres, 
-                kolor = :kolor
+                kolor = :kolor,
+                status = :status
             WHERE idosoba = :employeeId
         ";
         $stmt = $this->connection->prepare($updateQuery);
@@ -445,6 +447,7 @@ class EmployeeRepository
         $stmt->bindParam(':email', $email, PDO::PARAM_STR);
         $stmt->bindParam(':adres', $adres, PDO::PARAM_STR);
         $stmt->bindParam(':kolor', $kolor, PDO::PARAM_STR);
+        $stmt->bindParam(':status', $status, PDO::PARAM_STR);
         $stmt->bindParam(':employeeId', $employeeId, PDO::PARAM_INT);
 
         if (!$stmt->execute()) {
