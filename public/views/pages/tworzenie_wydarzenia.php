@@ -126,7 +126,7 @@ if ($_SESSION['user']['status'] !== 'administrator' && $_SESSION['user']['status
                 <?php if ($user['status'] === 'szef' || $user['status'] === 'administrator'): ?>
                 <div class="form-group">
                     <label for="dodatkowe-koszta">Dodatkowe koszta</label>
-                    <input type="number" id="dodatkowe-koszta" name="dodatkowe-koszta">
+                    <input type="number" id="dodatkowe-koszta" name="dodatkowe-koszta" value='0'>
                 </div>
                 <?php endif; ?>
                 <button type="submit" id="submit-btn">Utwórz wydarzenie</button>

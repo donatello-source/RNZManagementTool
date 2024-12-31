@@ -142,7 +142,7 @@ class EventRepository
         $datapoczatek = $data['data-poczatek'];
         $datakoniec = $data['data-koniec'] ?? $datapoczatek;
         $komentarz = $data['komentarz'] ?? '';
-        $dodatkowekoszta = $data['dodatkowe-koszta'] ?? '';
+        $dodatkowekoszta = $data['dodatkowe-koszta'] ?? '0';
         $pracownicy = $data['pracownicy'] ?? [];
     
         $query = "SELECT * FROM wydarzenia WHERE idwydarzenia = :eventId";
@@ -153,7 +153,7 @@ class EventRepository
         if ($result->rowCount() == 0) {
             return ['error' => 'Wydarzenie o podanym ID nie istnieje'];
         }
-            $queryFirma = "SELECT idfirma FROM firma WHERE nazwafirmy = :firmaNazwa";
+        $queryFirma = "SELECT idfirma FROM firma WHERE nazwafirmy = :firmaNazwa";
         $resultFirma = $this->connection->prepare($queryFirma);
         $resultFirma->bindParam(':firmaNazwa', $firma, PDO::PARAM_STR);
         $resultFirma->execute();
