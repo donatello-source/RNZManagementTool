@@ -11,12 +11,7 @@ class EventRepository
 
     public function getEvents(): array
     {
-        $query = "
-            SELECT w.idwydarzenia, w.nazwawydarzenia, w.idfirma, w.datapoczatek, w.datakoniec, w.miejsce, w.komentarz, f.nazwafirmy, w.hotel
-            FROM wydarzenia w
-            JOIN firma f ON w.idfirma = f.idfirma
-            ORDER BY w.datapoczatek
-        ";
+        $query = "SELECT * from widok_wydarzen";
 
         $stmt = $this->connection->prepare($query);
 
@@ -42,11 +37,7 @@ class EventRepository
     }
     public function getDetailedEvents(): array
     {
-        $query = "
-            SELECT w.idwydarzenia, w.nazwawydarzenia, w.idfirma, w.datapoczatek, w.datakoniec, w.miejsce, w.komentarz, f.nazwafirmy
-            FROM wydarzenia w
-            JOIN firma f ON w.idfirma = f.idfirma
-        ";
+        $query = "SELECT * from widok_szczegolowy_wydarzen";
 
         $result = $this->connection->query($query);
         if (!$result) {
