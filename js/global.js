@@ -1,26 +1,55 @@
-const menuToggle = document.querySelector(".menu-toggle");
-const sidebar = document.querySelector(".sidebar");
+class SidebarManager {
+    constructor(menuToggleSelector, sidebarSelector) {
+        this.menuToggle = document.querySelector(menuToggleSelector);
+        this.sidebar = document.querySelector(sidebarSelector);
 
-menuToggle.addEventListener("click", () => {
-    sidebar.classList.toggle("active");
-});
+        if (this.menuToggle && this.sidebar) {
+            this.init();
+        } else {
+            console.error('Nie znaleziono elementów menuToggle lub sidebar.');
+        }
+    }
 
+    init() {
+        this.menuToggle.addEventListener("click", () => this.toggleSidebar());
+    }
 
-function detectScale() {
-    const scale = window.devicePixelRatio;
-
-    document.documentElement.classList.remove('scale-1', 'scale-1-25', 'scale-1-5', 'scale-2');
-
-    if (scale === 1) {
-        document.documentElement.classList.add('scale-1');
-    } else if (scale === 1.25) {
-        document.documentElement.classList.add('scale-1-25');
-    } else if (scale === 1.5) {
-        document.documentElement.classList.add('scale-1-5');
-    } else if (scale >= 2) {
-        document.documentElement.classList.add('scale-2');
+    toggleSidebar() {
+        this.sidebar.classList.toggle("active");
     }
 }
 
-detectScale();
-window.addEventListener('resize', detectScale);
+class ScaleDetector {
+    constructor() {
+        this.scales = {
+            1: 'scale-1',
+            1.25: 'scale-1-25',
+            1.5: 'scale-1-5',
+            2: 'scale-2',
+        };
+        this.init();
+    }
+
+    init() {
+        this.detectScale();
+        window.addEventListener('resize', () => this.detectScale());
+    }
+
+    detectScale() {
+        const scale = window.devicePixelRatio;
+
+        Object.values(this.scales).forEach(scaleClass => {
+            document.documentElement.classList.remove(scaleClass);
+        });
+
+        const scaleClass = this.scales[scale] || null;
+        if (scaleClass) {
+            document.documentElement.classList.add(scaleClass);
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new SidebarManager('.menu-toggle', '.sidebar');
+    new ScaleDetector();
+});

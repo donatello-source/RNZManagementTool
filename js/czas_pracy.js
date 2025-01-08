@@ -1,18 +1,48 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const container = document.getElementById('work-time-container');
+class WorkTimeManager {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.events = [];
+        this.positions = [];
+    }
 
-    const [events, positions] = await Promise.all([
-        fetch('/getEmployeeEvents').then(res => res.json()),
-        fetch('/getEmployeePositions').then(res => res.json()),
-    ]);
-    if (events.message) {
+    async init() {
+        try {
+            await this.loadData();
+            if (this.events.message) {
+                this.displayNoEventsMessage();
+            } else {
+                this.renderEvents();
+                this.addGlobalEventListeners();
+            }
+        } catch (error) {
+            console.error('Błąd podczas inicjalizacji:', error);
+        }
+    }
+
+    async loadData() {
+        const [events, positions] = await Promise.all([
+            fetch('/getEmployeeEvents').then(res => res.json()),
+            fetch('/getEmployeePositions').then(res => res.json()),
+        ]);
+        this.events = events;
+        this.positions = positions;
+    }
+
+    displayNoEventsMessage() {
         const noEventsMessage = document.createElement('div');
         noEventsMessage.classList.add('no-events-message');
         noEventsMessage.textContent = "Nie znaleziono wydarzeń, jeżeli to pomyłka poinformuj administratora strony.";
-        container.appendChild(noEventsMessage);
-        return;
+        this.container.appendChild(noEventsMessage);
     }
-    events.forEach(event => {
+
+    renderEvents() {
+        this.events.forEach(event => {
+            const eventCard = this.createEventCard(event);
+            this.container.appendChild(eventCard);
+        });
+    }
+
+    createEventCard(event) {
         const eventCard = document.createElement('div');
         eventCard.classList.add('event-card');
         eventCard.setAttribute('data-id-wydarzenia', event.idwydarzenia);
@@ -27,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let workDays = '';
         event.dnipracy.forEach(day => {
-            const options = positions.map(position => `
+            const options = this.positions.map(position => `
                 <option value="${position.idstanowiska}" 
                         ${day.idstanowiska === position.idstanowiska ? 'selected' : ''}>
                     ${position.nazwastanowiska}
@@ -35,87 +65,96 @@ document.addEventListener('DOMContentLoaded', async () => {
             `).join('');
 
             workDays += `
-            <label>${day.dzien}</label>
-            <div class="work-day">
-                Obecność:
-                <input type="checkbox" class="presence" ${day.stawkadzienna == 1 ? 'checked' : ''}>
-                Stanowisko:
-                <select disabled>
-                    ${options}
-                </select>
-                nadgodziny:
-                <select class="overtime" disabled>
-                    ${Array.from({ length: 31 }, (_, i) => `<option value="${i}" ${day.nadgodziny == i ? 'selected' : ''}>${i}</option>`).join('')}
-                </select>
-            </div>
-
+                <label>${day.dzien}</label>
+                <div class="work-day">
+                    Obecność:
+                    <input type="checkbox" class="presence" ${day.stawkadzienna == 1 ? 'checked' : ''}>
+                    Stanowisko:
+                    <select disabled>
+                        ${options}
+                    </select>
+                    Nadgodziny:
+                    <select class="overtime" disabled>
+                        ${Array.from({ length: 31 }, (_, i) => `<option value="${i}" ${day.nadgodziny == i ? 'selected' : ''}>${i}</option>`).join('')}
+                    </select>
+                </div>
             `;
         });
 
         eventCard.innerHTML = header + workDays +
             `<button class="save-button">Zapisz</button>`;
-        container.appendChild(eventCard);
-    });
+        return eventCard;
+    }
 
-    addEventListeners();
-});
-function addEventListeners() {
-    document.querySelectorAll('.presence').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-            const parent = e.target.closest('.work-day');
-            const select = parent.querySelector('select');
-            const input = parent.querySelector('.overtime');
-            select.disabled = !e.target.checked;
-            input.disabled = !e.target.checked;
+    addGlobalEventListeners() {
+        this.container.addEventListener('change', (e) => {
+            if (e.target.classList.contains('presence')) {
+                this.toggleWorkDayInputs(e.target);
+            }
         });
-    });
 
-    document.querySelectorAll('.save-button').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const eventCard = e.target.closest('.event-card');
-            const eventId = eventCard.getAttribute('data-id-wydarzenia');
+        this.container.addEventListener('click', (e) => {
+            if (e.target.classList.contains('save-button')) {
+                this.saveEventData(e.target);
+            }
+        });
+    }
 
-            const workDays = Array.from(eventCard.querySelectorAll('.work-day')).map(day => {
-                const checkbox = day.querySelector('.presence');
-                const select = day.querySelector('select');
-                const overtimeInput = day.querySelector('.overtime');
+    toggleWorkDayInputs(checkbox) {
+        const parent = checkbox.closest('.work-day');
+        const select = parent.querySelector('select');
+        const input = parent.querySelector('.overtime');
+        select.disabled = !checkbox.checked;
+        input.disabled = !checkbox.checked;
+    }
 
-                const label = day.previousElementSibling;
-                const dzien = label ? label.textContent : null;
+    saveEventData(button) {
+        const eventCard = button.closest('.event-card');
+        const eventId = eventCard.getAttribute('data-id-wydarzenia');
 
-                return {
-                    obecność: checkbox.checked ? 1 : 0,
-                    dzień: dzien,
-                    idstanowiska: checkbox.checked ? parseInt(select.value, 10) : null,
-                    nadgodziny: checkbox.checked ? parseInt(overtimeInput.value, 10) || 0 : 0,
-                };
-            });
-            const payload = {
-                idWydarzenia: eventId,
-                dniPracy: workDays,
+        const workDays = Array.from(eventCard.querySelectorAll('.work-day')).map(day => {
+            const checkbox = day.querySelector('.presence');
+            const select = day.querySelector('select');
+            const overtimeInput = day.querySelector('.overtime');
+
+            const label = day.previousElementSibling;
+            const dzien = label ? label.textContent : null;
+
+            return {
+                obecność: checkbox.checked ? 1 : 0,
+                dzień: dzien,
+                idstanowiska: checkbox.checked ? parseInt(select.value, 10) : null,
+                nadgodziny: checkbox.checked ? parseInt(overtimeInput.value, 10) || 0 : 0,
             };
-            console.log(payload);
-
-            fetch('/saveEmployeeEventDays', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Dane zapisano pomyślnie');
-                    } else {
-                        alert('Wystąpił błąd: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Błąd podczas zapisywania:', error);
-                });
         });
-    });
+
+        const payload = {
+            idWydarzenia: eventId,
+            dniPracy: workDays,
+        };
+
+        fetch('/saveEmployeeEventDays', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Dane zapisano pomyślnie');
+                } else {
+                    alert('Wystąpił błąd: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Błąd podczas zapisywania:', error);
+            });
+    }
 }
 
-
+document.addEventListener('DOMContentLoaded', () => {
+    const manager = new WorkTimeManager('work-time-container');
+    manager.init();
+});

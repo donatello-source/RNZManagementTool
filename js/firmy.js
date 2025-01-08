@@ -1,30 +1,54 @@
-// Funkcja do pobierania firm
-async function fetchFirms() {
-    try {
-        const response = await fetch('/RNZManagementTool/getAllFirms');
-        const firms = await response.json();
-        displayFirms(firms);
-    } catch (error) {
-        console.error('Błąd podczas ładowania firm:', error);
+class FirmManager {
+    constructor(containerId, fetchUrl) {
+        this.container = document.getElementById(containerId);
+        this.fetchUrl = fetchUrl;
     }
-}
 
-// Funkcja do wyświetlania firm
-function displayFirms(data) {
-    const firmContainer = document.getElementById('firm-container');
-    if (firmContainer) {
-        firmContainer.innerHTML = ''; // Wyczyść zawartość
+    async init() {
+        try {
+            const firms = await this.fetchFirms();
+            this.displayFirms(firms);
+        } catch (error) {
+            console.error('Błąd podczas ładowania firm:', error);
+        }
+    }
+
+    async fetchFirms() {
+        const response = await fetch(this.fetchUrl);
+        return response.json();
+    }
+
+    displayFirms(data) {
+        if (!this.container) {
+            console.error('Element #firm-container nie został znaleziony.');
+            return;
+        }
+
+        this.container.innerHTML = '';
         data.forEach(firm => {
-            firmContainer.innerHTML += `
-                <div class="firm-card" onclick="location.href='profil_firma.php?id=${firm.idfirma}';" style='background-color: ${firm.kolor}'>
-                    <div class='firm-name'>${firm.nazwafirmy}</div>
-                    <div class='firm-phone'>Telefon: ${firm.telefon || 'Brak numeru'}</div>
-                </div>
-            `;
+            const firmCard = this.createFirmCard(firm);
+            this.container.appendChild(firmCard);
         });
-    } else {
-        console.error('Element #firm-container nie został znaleziony.');
+    }
+
+    createFirmCard(firm) {
+        const firmCard = document.createElement('div');
+        firmCard.className = 'firm-card';
+        firmCard.style.backgroundColor = firm.kolor || '#ffffff';
+        firmCard.onclick = () => {
+            location.href = `profil_firma.php?id=${firm.idfirma}`;
+        };
+
+        firmCard.innerHTML = `
+            <div class="firm-name">${firm.nazwafirmy}</div>
+            <div class="firm-phone">Telefon: ${firm.telefon || 'Brak numeru'}</div>
+        `;
+
+        return firmCard;
     }
 }
 
-window.onload = fetchFirms;
+document.addEventListener('DOMContentLoaded', () => {
+    const manager = new FirmManager('firm-container', '/RNZManagementTool/getAllFirms');
+    manager.init();
+});
