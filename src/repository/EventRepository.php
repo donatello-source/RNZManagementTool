@@ -277,43 +277,45 @@ class EventRepository
             }
     
             $idwydarzenia = $this->connection->lastInsertId();
+            if (!empty($pracownicy)) {
                 foreach ($pracownicy as $pracownik) {
-                $dnipracownika = $eventData['dni'][$pracownik] ?? [];
-    
-                if (!empty($dnipracownika)) {
-                    foreach ($dnipracownika as $dzien) {
+                    $dnipracownika = $eventData['dni'][$pracownik] ?? [];
+            
+                    if (!empty($dnipracownika)) {
+                        foreach ($dnipracownika as $dzien) {
+                            $stmt = $this->connection->prepare("
+                                INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien)
+                                VALUES (:idwydarzenia, :pracownik, :dzien)
+                            ");
+                            if (!$stmt) {
+                                throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
+                            }
+            
+                            $stmt->bindParam(':idwydarzenia', $idwydarzenia, PDO::PARAM_INT);
+                            $stmt->bindParam(':pracownik', $pracownik, PDO::PARAM_INT);
+                            $stmt->bindParam(':dzien', $dzien, PDO::PARAM_STR);
+            
+                            if (!$stmt->execute()) {
+                                throw new Exception("Błąd podczas przypisywania pracownika: " . $stmt->errorInfo());
+                            }
+                        }
+                    } else {
                         $stmt = $this->connection->prepare("
                             INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien)
-                            VALUES (:idwydarzenia, :pracownik, :dzien)
+                            VALUES (:idwydarzenia, :pracownik, '0')
                         ");
                         if (!$stmt) {
                             throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
                         }
-    
+            
                         $stmt->bindParam(':idwydarzenia', $idwydarzenia, PDO::PARAM_INT);
                         $stmt->bindParam(':pracownik', $pracownik, PDO::PARAM_INT);
-                        $stmt->bindParam(':dzien', $dzien, PDO::PARAM_STR);
-    
+            
                         if (!$stmt->execute()) {
                             throw new Exception("Błąd podczas przypisywania pracownika: " . $stmt->errorInfo());
                         }
                     }
-                } else {
-                    $stmt = $this->connection->prepare("
-                        INSERT INTO wydarzeniapracownicy (idwydarzenia, idosoba, dzien)
-                        VALUES (:idwydarzenia, :pracownik, '0')
-                    ");
-                    if (!$stmt) {
-                        throw new Exception("Błąd przygotowania zapytania: " . $this->connection->errorInfo());
-                    }
-    
-                    $stmt->bindParam(':idwydarzenia', $idwydarzenia, PDO::PARAM_INT);
-                    $stmt->bindParam(':pracownik', $pracownik, PDO::PARAM_INT);
-    
-                    if (!$stmt->execute()) {
-                        throw new Exception("Błąd podczas przypisywania pracownika: " . $stmt->errorInfo());
-                    }
-                }
+                }            
             }
                 $this->connection->commit();
             return true;

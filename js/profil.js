@@ -1,210 +1,187 @@
-// Funkcja do odczytywania parametrów z URL
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param); // Zwróci wartość parametru 'id'
-}
-// Odczytanie id z URL
-const employeeId = getQueryParam('id');
-// Sprawdzenie, czy istnieje ID i pobranie danych
-if (employeeId) {
-    fetchEmployeeData(employeeId);
-} else {
-    console.error('Brak parametru ID w URL');
-}
+class EmployeeProfileManager {
+    constructor(profileSelector) {
+        this.profileContainer = document.querySelector(profileSelector);
+        this.employeeId = this.getQueryParam('id');
 
-// Funkcja do pobrania danych pracownika z API
-function fetchEmployeeData(id) {
-    fetch(`/RNZManagementTool/getEmployee?id=${id}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error('Błąd:', data.error);
-            } else {
-                displayEmployeeProfile(data); // Wyświetl dane pracownika
+        if (!this.profileContainer || !this.employeeId) {
+            console.error('Nie znaleziono kontenera profilu lub brakuje parametru ID w URL.');
+            return;
+        }
+
+        this.init();
+    }
+
+    getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    async init() {
+        try {
+            const employeeData = await this.fetchEmployeeData(this.employeeId);
+            if (employeeData.error) {
+                console.error('Błąd podczas pobierania danych:', employeeData.error);
+                return;
             }
-        })
-        .catch(error => console.error('Błąd podczas ładowania danych:', error));
-}
-
-function getComplementaryColor(color) {
-    // Tworzymy ukryty element do zamiany dowolnego formatu koloru na RGB
-    const dummyDiv = document.createElement('div');
-    dummyDiv.style.color = color; // Ustawienie koloru
-    document.body.appendChild(dummyDiv);
-    // Pobranie rzeczywistego koloru w formacie RGB
-    const computedColor = window.getComputedStyle(dummyDiv).color; // Wynik w 'rgb(r, g, b)'
-    document.body.removeChild(dummyDiv); // Usunięcie elementu po użyciu
-    // Wyciągnięcie składowych RGB
-    const rgbMatch = computedColor.match(/rgb\((\d+), (\d+), (\d+)\)/);
-    if (!rgbMatch) {
-        console.error('Nie można obliczyć koloru dla:', color);
-        return '#000000'; // Domyślny kolor: czarny
+            this.displayEmployeeProfile(employeeData);
+        } catch (error) {
+            console.error('Błąd podczas inicjalizacji profilu pracownika:', error);
+        }
     }
 
-    const r = parseInt(rgbMatch[1]);
-    const g = parseInt(rgbMatch[2]);
-    const b = parseInt(rgbMatch[3]);
-
-    // Obliczenie koloru dopełniającego
-    const compR = 255 - r;
-    const compG = 255 - g;
-    const compB = 255 - b;
-
-    // Konwersja na format RGB
-    if (r + g + b == 0 && color != 'black' && color != '#000000') {
-        return `rgb(0, 0, 0)`
+    async fetchEmployeeData(id) {
+        const response = await fetch(`/RNZManagementTool/getEmployee?id=${id}`);
+        return await response.json();
     }
-    return `rgb(${compR}, ${compG}, ${compB})`;
-}
 
+    getComplementaryColor(color) {
+        const dummyDiv = document.createElement('div');
+        dummyDiv.style.color = color; // Ustawienie koloru
+        document.body.appendChild(dummyDiv);
+        const computedColor = window.getComputedStyle(dummyDiv).color;
+        document.body.removeChild(dummyDiv);
+        const rgbMatch = computedColor.match(/rgb\((\d+), (\d+), (\d+)\)/);
+        if (!rgbMatch) {
+            console.error('Nie można obliczyć koloru dla:', color);
+            return '#000000';
+        }
 
-function displayEmployeeProfile(employee) {
-    console.log(employee)
-    const profileContainer = document.getElementById('employee-profile');
-    if (profileContainer) {
-        const complementaryColor = getComplementaryColor(employee.kolor);
+        const r = parseInt(rgbMatch[1]);
+        const g = parseInt(rgbMatch[2]);
+        const b = parseInt(rgbMatch[3]);
+
+        const compR = 255 - r;
+        const compG = 255 - g;
+        const compB = 255 - b;
+
+        if (r + g + b == 0 && color != 'black' && color != '#000000') {
+            return 'rgb(0, 0, 0)';
+        }
+        return 'rgb(compR, compG, compB)';
+    }
+
+    displayEmployeeProfile(employee) {
+        const complementaryColor = this.getComplementaryColor(employee.kolor);
 
         let profileHTML = `
-    <div class="employee-card">
-        <div class="profil-name">
-            <label for="employee-name">Imię i nazwisko:</label>
-            <input type="text" id="employee-name" value="${employee.imie} ${employee.nazwisko}" readonly>
-        </div>
-        <div class="profil-phone">
-            <label for="employee-phone">Numer telefonu:</label>
-            <input type="text" id="employee-phone" value="${employee.numertelefonu}" readonly>
-        </div>
-        <div class="profil-mail">
-            <label for="employee-mail">Email:</label>
-            <input type="email" id="employee-mail" value="${employee.email}" readonly>
-        </div>
-        <div class="profil-addres">
-            <label for="employee-address">Adres zamieszkania:</label>
-            <input type="text" id="employee-address" value="${employee.adreszamieszkania}" readonly>
-        </div>
-        <div class="profil-state">
-            <label for="employee-position">Status:</label>
-            <input type="text" id="employee-position" value="${employee.status}" readonly>
-        </div>
-        <div class="profil-color">
-            <label for="employee-position">Kolor:</label>
-            <input type="text" id="employee-color" value="${employee.kolor}" readonly>
-        </div>
-    `;
+            <div class="employee-card">
+                ${this.createProfileField('Imię i nazwisko', 'employee-name', `${employee.imie} ${employee.nazwisko}`)}
+                ${this.createProfileField('Numer telefonu', 'employee-phone', employee.numertelefonu)}
+                ${this.createProfileField('Email', 'employee-mail', employee.email)}
+                ${this.createProfileField('Adres zamieszkania', 'employee-address', employee.adreszamieszkania)}
+                ${this.createProfileField('Status', 'employee-position', employee.status)}
+                ${this.createProfileField('Kolor', 'employee-color', employee.kolor)}
+            `;
 
         if (employee.stanowiska.length > 0) {
             profileHTML += `<div class="profil-position">`;
             employee.stanowiska.forEach((stanowisko) => {
-                if (stanowisko.stawka == null) {
-                    stanowisko.stawka = 0;
-                }
-                profileHTML += `
-                <div class="position-row">
-                    <label for="position-salary-${stanowisko.idstanowiska}">${stanowisko.nazwastanowiska} stawka:</label>
-                    <input type="text" id="position-salary-${stanowisko.idstanowiska}" value="${stanowisko.stawka}" readonly>
-                </div>
-            `;
+                profileHTML += this.createProfileField(
+                    `${stanowisko.nazwastanowiska} stawka`,
+                    `position-salary-${stanowisko.idstanowiska}`,
+                    stanowisko.stawka || 0
+                );
             });
-            profileHTML += `
-                    </div>
-            </div>`;
+            profileHTML += `</div>`;
         }
 
         profileHTML += `
-        <button type="button" id="edit-profil-btn">Edytuj Pracownika</button>
-        <style>
-            #employee-profile {
-                background-color: ${employee.kolor};
-            }
-            #employee-profile label {
-                color: ${complementaryColor};
-            }
-        </style>
-    `;
+            <button type="button" id="edit-profil-btn">Edytuj Pracownika</button>
+            <style>
+                #employee-profile {
+                    background-color: ${employee.kolor};
+                }
+                #employee-profile label {
+                    color: ${complementaryColor};
+                }
+            </style>
+        `;
 
-        profileContainer.innerHTML = profileHTML;
-    } else {
-        console.error('Element #employee-profile nie został znaleziony.');
+        this.profileContainer.innerHTML = profileHTML;
+
+        document.getElementById('edit-profil-btn').addEventListener('click', () => this.handleEditProfile());
     }
-    const editProfilButton = document.getElementById("edit-profil-btn");
-    editProfilButton.addEventListener("click", handleEditProfile);
-}
 
+    createProfileField(labelText, id, value) {
+        return `
+            <div class="profil-field">
+                <label for="${id}">${labelText}:</label>
+                <input type="text" id="${id}" value="${value}" readonly>
+            </div>
+        `;
+    }
 
-function enableFormEditing() {
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = `Usuń Pracownika`;
-    deleteBtn.id = "remove-profil-btn";
-    deleteBtn.type = "button";
-    deleteBtn.addEventListener("click", handleDeleteProfile);
-    document.getElementById('employee-profile').appendChild(deleteBtn);
+    enableFormEditing() {
+        document.querySelectorAll("#employee-profile input").forEach(input => {
+            input.readOnly = false;
+        });
 
-    document.querySelectorAll("#employee-profile input").forEach(input => {
-        input.disabled = false;
-        input.readOnly = false;
-    });
-}
-function handleDeleteProfile() {
-    if (employeeId && confirm("Czy na pewno chcesz usunąć tego pracownika?")) {
-        fetch(`/RNZManagementTool/deleteEmployee?id=${employeeId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Usuń Pracownika";
+        deleteBtn.id = "remove-profil-btn";
+        deleteBtn.addEventListener("click", () => this.handleDeleteProfile());
+        this.profileContainer.appendChild(deleteBtn);
+    }
+
+    async handleDeleteProfile() {
+        if (confirm("Czy na pewno chcesz usunąć tego pracownika?")) {
+            try {
+                const response = await fetch(`/RNZManagementTool/deleteEmployee?id=${this.employeeId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const result = await response.json();
+                if (result.success) {
                     alert("Pracownik został usunięty!");
                     window.location.href = "/public/views/pages/pracownicy.php";
                 } else {
-                    alert("Błąd podczas usuwania pracownika: " + (data.message || 'Nieznany błąd'));
+                    alert("Błąd podczas usuwania: " + (result.message || 'Nieznany błąd'));
                 }
-            })
-            .catch(error => console.error("Błąd:", error));
+            } catch (error) {
+                console.error("Błąd:", error);
+            }
+        }
+    }
+
+    handleEditProfile() {
+        const editButton = document.getElementById("edit-profil-btn");
+        if (editButton != null) {
+            this.enableFormEditing();
+            editButton.textContent = "Zapisz Pracownika";
+            editButton.id = "save-profil-btn";
+            editButton.addEventListener("click", () => this.handleSaveProfile());
+        }
+    }
+
+    async handleSaveProfile() {
+        const updatedData = {
+            imie: document.getElementById("employee-name").value.split(" ")[0],
+            nazwisko: document.getElementById("employee-name").value.split(" ")[1],
+            numertelefonu: document.getElementById("employee-phone").value,
+            email: document.getElementById("employee-mail").value,
+            adreszamieszkania: document.getElementById("employee-address").value,
+            status: document.getElementById("employee-position").value,
+            kolor: document.getElementById("employee-color").value,
+            stanowiska: Array.from(document.querySelectorAll(".profil-position input")).map(input => ({
+                idstanowiska: input.id.split('-').pop(),
+                stawka: input.value
+            }))
+        };
+
+        try {
+            console.log(updatedData);
+            const response = await fetch(`/updateEmployee?id=${this.employeeId}`, {
+                method: "POST",
+                body: JSON.stringify(updatedData),
+                headers: { "Content-Type": "application/json" }
+            });
+            const result = await response.json();
+            alert(result.message);
+            //window.location.reload();
+        } catch (error) {
+            console.error("Błąd podczas zapisu:", error);
+        }
     }
 }
 
-const handleEditProfile = () => {
-    enableFormEditing();
-    const editProfilButton = document.getElementById("edit-profil-btn");
-    editProfilButton.textContent = "Zapisz Pracownika";
-    editProfilButton.id = "save-profil-btn";
-    editProfilButton.removeEventListener("click", handleEditProfile);
-    editProfilButton.addEventListener("click", handleSaveProfile);
-};
-const handleSaveProfile = async () => {
-    const employeeId = getQueryParam('id');
-    const updatedData = {
-        imie: document.getElementById("employee-name").value.split(" ")[0],
-        nazwisko: document.getElementById("employee-name").value.split(" ")[1],
-        numertelefonu: document.getElementById("employee-phone").value,
-        email: document.getElementById("employee-mail").value,
-        adreszamieszkania: document.getElementById("employee-address").value,
-        status: document.getElementById("employee-position").value,
-        kolor: document.getElementById("employee-color").value,
-        stanowiska: [],
-    };
-
-    document.querySelectorAll(".position-row input").forEach((input, index) => {
-        updatedData.stanowiska.push({
-            idstanowiska: input.id.split('-').pop(),
-            stawka: input.value,
-        });
-    });
-    //console.log(updatedData)
-    try {
-        const response = await fetch(`/updateEmployee?id=${employeeId}`, {
-            method: "POST",
-            body: JSON.stringify(updatedData),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        const result = await response.json();
-        alert(result.message);
-        window.location.reload();
-
-    } catch (error) {
-        console.error("Błąd podczas aktualizacji pracownika:", error);
-    }
-};
+new EmployeeProfileManager('#employee-profile');

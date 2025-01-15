@@ -1,45 +1,60 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('filter');
-    const container = document.getElementById('summary-container');
+class SummaryManager {
+    constructor(formSelector, containerSelector) {
+        this.form = document.querySelector(formSelector);
+        this.container = document.querySelector(containerSelector);
 
-    form.addEventListener('submit', async (event) => {
+        if (!this.form || !this.container) {
+            throw new Error('Element formularza lub kontenera nie został znaleziony.');
+        }
+
+        this.init();
+    }
+
+    init() {
+        this.form.addEventListener('submit', (event) => this.handleFormSubmit(event));
+    }
+
+    async handleFormSubmit(event) {
         event.preventDefault();
-        const formData = new FormData(form);
+        const formData = new FormData(this.form);
         const type = formData.get('type');
-        const month = formData.get('month').split("-")[1];
-        const year = formData.get('month').split("-")[0];
+        const [year, month] = formData.get('month').split("-");
         try {
             const response = await fetch(`/RNZManagementTool/getSummary?type=${type}&month=${month}&year=${year}`);
             const data = await response.json();
+
             if (data.error) {
-                container.innerHTML = `<div class="no-summary">${data.error}</div>`;
+                this.container.innerHTML = `<div class="no-summary">${data.error}</div>`;
                 return;
             }
 
-            renderSummary(type, data, container);
+            this.renderSummary(type, data);
         } catch (error) {
-            console.error(error);
+            console.error('Błąd podczas ładowania danych:', error);
             alert('Wystąpił błąd podczas ładowania danych.');
         }
-    });
+    }
 
-    function renderSummary(type, data, container) {
+    renderSummary(type, data) {
         let html = '';
         switch (type) {
             case 'firms':
-                html = renderFirms(data);
+                html = this.renderFirms(data);
                 break;
             case 'events':
-                html = renderEvents(data);
+                html = this.renderEvents(data);
                 break;
             case 'employees':
-                html = renderEmployees(data);
+                html = this.renderEmployees(data);
                 break;
+            default:
+                console.error('Nieznany typ podsumowania:', type);
+                return;
         }
-        container.innerHTML = html;
+        this.container.innerHTML = html;
     }
 
-    function renderFirms(data) {
+    renderFirms(data) {
         const firms = data.data;
         let html = '<h2>Podsumowanie Firm</h2>';
 
@@ -47,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `<div class="summary-card">
                 <h3>${firmName} - Suma: ${details.suma} zł</h3>`;
             details.wydarzenia.forEach(event => {
-                html += `<div>${event.nazwa} - ${event.suma} zł</div> `;
+                html += `<div>${event.nazwa} - ${event.suma} zł</div>`;
             });
             html += '</div>';
         }
@@ -56,9 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return html;
     }
-    function renderEvents(data) {
+
+    renderEvents(data) {
         const events = data.data;
-        console.log(data);
         let html = '<h2>Podsumowanie Wydarzeń</h2>';
         for (const [eventName, details] of Object.entries(events)) {
             html += `<div class="summary-card">
@@ -75,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     }
 
-    function renderEmployees(data) {
+    renderEmployees(data) {
         let totalSum = 0;
         const employees = data.data;
         let html = '<h2>Podsumowanie Pracowników</h2>';
@@ -86,4 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `<div class="total-summary">Suma ogółem: ${totalSum} zł</div>`;
         return html;
     }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new SummaryManager('#filter', '#summary-container');
 });

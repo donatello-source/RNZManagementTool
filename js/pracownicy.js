@@ -1,48 +1,66 @@
-async function fetchEmployees() {
-    try {
-        const response = await fetch('/RNZManagementTool/getAllEmployees');
-        const employees = await response.json();
-        displayEmployees(employees);
-    } catch (error) {
-        console.error('Błąd podczas ładowania pracowników:', error);
+class EmployeeManager {
+    constructor(containerSelector, userStatusSelector) {
+        this.employeeContainer = document.querySelector(containerSelector);
+        this.userStatus = document.querySelector(userStatusSelector);
+        this.isBoss = false;
+
+        if (!this.employeeContainer) {
+            throw new Error('Element kontenera pracowników nie został znaleziony.');
+        }
+
+        if (this.userStatus) {
+            const status = this.userStatus.textContent;
+            this.isBoss = status === 'administrator' || status === 'szef';
+        }
     }
-}
-let isBoss = false;
-if (document.getElementById("userStatus").textContent == "administrator" || document.getElementById("userStatus").textContent == "szef") {
-    isBoss = true;
-}
-function displayEmployees(data) {
-    const employeeContainer = document.getElementById('employee-container');
-    if (employeeContainer) {
-        employeeContainer.innerHTML = '';
-        if (isBoss) {
-            data.forEach(employee => {
-                //console.log(employee)
-                employeeContainer.innerHTML += `
-                <div onclick="location.href='profil.php?id=${employee.idosoba}';" class="employee-card" style='background-color: ${employee.kolor}'>
-                    <div class='employee-name'>${employee.imie} ${employee.nazwisko}</div>
-                    
-                    <div class='employee-phone'>Numer telefonu: ${employee.numertelefonu}</div>
-                </div>
-            `;
-            });
-        } else {
-            data.forEach(employee => {
-                //console.log(employee)
-                employeeContainer.innerHTML += `
-                <div class="employee-card" style='background-color: ${employee.kolor}'>
-                    <div class='employee-name'>${employee.imie} ${employee.nazwisko}</div>
-                    
-                    <div class='employee-phone'>Numer telefonu: ${employee.numertelefonu}</div>
-                </div>
-            `;
+
+    async fetchEmployees() {
+        try {
+            const response = await fetch('/RNZManagementTool/getAllEmployees');
+            const employees = await response.json();
+            this.displayEmployees(employees);
+        } catch (error) {
+            console.error('Błąd podczas ładowania pracowników:', error);
+        }
+    }
+
+    displayEmployees(data) {
+        this.employeeContainer.innerHTML = '';
+        data.forEach(employee => {
+            const employeeCard = this.createEmployeeCard(employee);
+            this.employeeContainer.appendChild(employeeCard);
+        });
+    }
+
+    createEmployeeCard(employee) {
+        const card = document.createElement('div');
+        card.className = 'employee-card';
+        card.style.backgroundColor = employee.kolor;
+
+        const name = document.createElement('div');
+        name.className = 'employee-name';
+        name.textContent = `${employee.imie} ${employee.nazwisko}`;
+
+        const phone = document.createElement('div');
+        phone.className = 'employee-phone';
+        phone.textContent = `Numer telefonu: ${employee.numertelefonu}`;
+
+        card.appendChild(name);
+        card.appendChild(phone);
+
+        if (this.isBoss) {
+            card.addEventListener('click', () => {
+                location.href = `profil.php?id=${employee.idosoba}`;
             });
         }
 
-    } else {
-        console.error('Element #employee-container nie został znaleziony.');
+        return card;
+    }
+
+    init() {
+        window.onload = () => this.fetchEmployees();
     }
 }
 
-
-window.onload = fetchEmployees;
+const employeeManager = new EmployeeManager('#employee-container', '#userStatus');
+employeeManager.init();
